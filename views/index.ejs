@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html class="loading" lang="en" data-textdirection="ltr">
+<!-- BEGIN: Head-->
+
+<head>
+    <%- include('_layouts/head') %>
+    <title>Dashboard | <%= title %></title>
+    <link rel="stylesheet" type="text/css" href="/app-assets/css/pages/dashboard.css">
+    <style>
+        .gradient-45deg-purple-light-purple {
+        background: linear-gradient(45deg, #9c27b0, #d3a6db);
+        }
+    </style>
+</head>
+<!-- END: Head-->
+
+<body class="vertical-layout page-header-light vertical-menu-collapsible vertical-dark-menu preload-transitions 2-columns" data-open="click" data-menu="vertical-dark-menu" data-col="2-columns">
+
+    <%- include('_layouts/sidenavbar') %>
+
+    <!-- BEGIN: Page Main-->
+    <div id="main">
+        <div class="row">
+            <div class="col s12">
+                <div class="container">
+                    <div class="section">
+                        <!--card stats start-->
+                        <div id="card-stats" class="pt-0">
+                            <div class="row">
+                                <%- messages('messages', locals) %>
+                            </div>
+                            <div class="row">
+
+                          
+
+                            </div>
+                            <!--card stats end-->
+
+                        </div>
+                        <!--end container-->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Page Main-->
+    <%- include('_layouts/commonJs') %>
+</body>
+
+</html>

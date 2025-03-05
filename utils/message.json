@@ -1,0 +1,99 @@
+{
+  "error": {
+    "name": "Please provide full name.",
+    "fname": "Please provide first name.",
+    "lname": "Please provide last name.",
+    "email": "Please provide email.",
+    "emailInvalid": "Please provide a valid email.",
+    "phoneInvalid": "Please provide a valid phone number.",
+    "phone": "Please provide phone number.",
+    "dob": "Please provide Date of Birth.",
+    "password": "Please provide password.",
+    "passwordLength": "Password should be atleast 6 characters long.",
+    "passwordLength8Char": "Password should be atleast 8 characters long.",
+    "fcmToken": "fcmToken is required.",
+    "boothNo": "Booth No is required.",
+    "eventCode": "Event Code is required.",
+
+    "location": "Please provide location.",
+    "city": "Please provide city.",
+    "state": "Please provide state.",
+    "country": "Please provide country.",
+    "postalCode": "Please provide postal code.",
+    "comments": "Please enter comments.",
+
+    "credentials": "Invalid credentials.",
+    "phonePassword": "Provide phone and password!",
+    "namePassword": "Provide name/email and password!",
+    "incorrectCredentials": "Provide email and password!",
+
+    "oldPassword": "Please provide current password.",
+    "newPassword": "Please provide new password.",
+    "confirmPassword": "Please confirm your password.",
+    "passwordNotMatch": "New password & confirm password not match.",
+    "wrongPassword": "Password incorrect.",
+    "invalidPassword": "Incorrect password.",
+    "samePassword": "New password can not be same as current password.",
+
+    "invalidEmail": "We can't find your account.",
+    "resetRequired": "We require you to reset your password before logging in.",
+    "provideToken": "Please provide authentication token.",
+    "login": "Please login first.",
+    "blocked": "Sorry! You are blocked, Please contact Admin.",
+    "deleted": "Your account has been deleted.",
+    "alreadyRegistered": "Email is already registerd.",
+    "alreadyRegisteredUser": "Username already exists. Please choose a different user name.",
+    "removeSpace": "Username cannot contain spaces.",
+    "allOfferUsed": "All the offer card used, Make Payment to Create new offer.",
+    "paymentRequired": "Make Payment to Create new offer.",
+    "adminVerificationRequired": "Admin verification of your account pending.",
+    "urlInvalid": "Please provide a valid Link.",
+
+    "notRegistered": "The email provided is not registered.",
+    "notRegisteredPhone": "The phone provided is not registered.",
+    "linkSent": "Password reset link sent to email.",
+    "tokenInvalid": "Link is invalid or expired, Please try again.",
+    "userNotFound": "No user with this phone number.",
+
+    "otpSent": "OTP sent to your phone number.",
+    "otpFail": "Failed to verify OTP.",
+    "otpRequired": "Please provide phone number and otp.",
+
+    "otpSentEmail": "OTP sent to your email.",
+    "otpRequiredEmail": "Please provide email and otp.",
+
+    "google": "Please log in with Google.",
+    "facebook": "Please log in with Facebook.",
+    "apple": "Please log in with Apple.",
+    "emailLogin": "Please log in with email & password.",
+    "invalidGoogle": "Invalid Google ID.",
+    "invalidFacebook": "Invalid Facebook ID.",
+    "invalidApple": "Invalid Apple ID.",
+    "preferenceNotFound": "User preference not found."
+  },
+
+  "success": {
+    "msg": "Message sent successfully.",
+
+    "passwordUpdated": "Password updated succefully.",
+    "otpVerified": "OTP verified succefully.",
+
+    "addAdded": "Address added succefully.",
+    "addUpdated": "Address updated succefully.",
+    "addDeleted": "Address deleted succefully.",
+    "addSelected": "Address selected succefully.",
+
+    "loginSuccefully": "Login Succefully.",
+    "registerSuccefully": "Register Succefully.",
+    "profileUpdateSuccefully": "Profile Updated Succefully.",
+    "profileCreatedSuccefully": "Profile Created Succefully.",
+    "eventAddedSuccefully": "Event code added Succefully.",
+    "eventGetSuccefully": "Events retrieved successfully.",
+    "notificationSuccefully": "Notifications retrieved successfully.",
+    "prefrenceSuccefully": "Preference saved successfully.",
+
+    "offerEditedSuccefully": "Offer updated successfully.",
+    "offerDeletedSuccefully": "Offer deleted successfully.",
+    "offerImageDeletedSuccefully": "Offer image deleted successfully."
+  }
+}

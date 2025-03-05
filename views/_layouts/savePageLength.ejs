@@ -1,0 +1,15 @@
+<script>
+    $(document).ready(function() {
+        // Initialize DataTable
+        $('#page-length-option').DataTable({
+            stateSave: true,
+            stateSaveParams: function(settings, data) {
+                data.search.search = "";
+            },
+            responsive: true,
+            scrollX: true,
+            lengthMenu: [10, 25, 50, 100],
+            pageLength: 25,
+        });
+    });
+</script>
