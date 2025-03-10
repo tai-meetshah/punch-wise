@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 
-const holidaySchema = new mongoose.Schema({
-    company: {
+const expensesSchema = new mongoose.Schema({
+    salesman: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: 'Company',
+        ref: 'Salesman',
     },
     manager: {
         type: mongoose.Schema.Types.ObjectId,
@@ -14,14 +14,12 @@ const holidaySchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Company',
     },
+
     date: { type: String, required: true },
-    name: { type: String, required: true },
-    status: {
-        type: String,
-        enum: ['Pending', 'Approved', 'Rejected', 'Cancelled'],
-        default: 'Pending',
-    },
-    rejectReason: { type: Strings },
+    expensesFor: { type: String, required: true },
+    amount: { type: String, required: true },
+    description: { type: String, required: true },
+    receipt: { type: String, required: true },
 
     createdAt: {
         type: Date,
@@ -29,4 +27,4 @@ const holidaySchema = new mongoose.Schema({
     },
 });
 
-module.exports = new mongoose.model('Holiday', holidaySchema);
+module.exports = new mongoose.model('Holiday', expensesSchema);
