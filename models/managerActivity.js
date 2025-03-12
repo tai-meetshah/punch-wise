@@ -20,7 +20,6 @@ const managerActivitySchema = new mongoose.Schema(
         status: {
             type: String,
             enum: ['checked-in', 'on-break', 'working', 'checked-out'],
-            default: 'checked-in',
         },
     },
     { timestamps: true }

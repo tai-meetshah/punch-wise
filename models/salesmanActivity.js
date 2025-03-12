@@ -27,14 +27,13 @@ const salesmanActivitySchema = new mongoose.Schema(
             },
         ],
 
-        checkInTime: { type: Date, default: null },
-        breakTime: { type: Date, default: null },
-        resumeTime: { type: Date, default: null },
-        checkOutTime: { type: Date, default: null },
+        // checkInTime: { type: Date, default: null },
+        // breakTime: { type: Date, default: null },
+        // resumeTime: { type: Date, default: null },
+        // checkOutTime: { type: Date, default: null },
         status: {
             type: String,
             enum: ['checked-in', 'on-break', 'working', 'checked-out'],
-            default: 'checked-in',
         },
     },
     { timestamps: true }

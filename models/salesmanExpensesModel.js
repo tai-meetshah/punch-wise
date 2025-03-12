@@ -15,11 +15,19 @@ const expensesSchema = new mongoose.Schema({
         ref: 'Company',
     },
 
-    date: { type: String, required: true },
+    fromDate: { type: Date, required: true },
+    toDate: { type: Date, required: true },
     expensesFor: { type: String, required: true },
     amount: { type: String, required: true },
     description: { type: String, required: true },
     receipt: { type: String, required: true },
+
+    status: {
+        type: String,
+        enum: ['Pending', 'Approved', 'Rejected', 'Cancelled'],
+        default: 'Pending',
+    },
+    rejectReason: { type: Strings },
 
     createdAt: {
         type: Date,
@@ -27,4 +35,4 @@ const expensesSchema = new mongoose.Schema({
     },
 });
 
-module.exports = new mongoose.model('Holiday', expensesSchema);
+module.exports = new mongoose.model('Salesman Expenses', expensesSchema);
