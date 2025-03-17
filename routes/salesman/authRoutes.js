@@ -12,7 +12,18 @@ router.post(
     authController.verifyRegisterOTP
 );
 
+router.route('/create-profile').post(
+    upload.fields([
+        { name: 'idProof', maxCount: 1 },
+        { name: 'certificate', maxCount: 1 },
+    ]),
+    checkSalesman,
+    authController.createProfile
+);
+
 router.post('/resend-otp', fileUpload(), authController.resendOTP);
+
+router.post('/login-check', fileUpload(), authController.loginPhoneCheck);
 
 router.post('/login', fileUpload(), authController.login);
 

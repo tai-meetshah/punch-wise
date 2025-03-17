@@ -68,6 +68,17 @@ const taskSchema = new mongoose.Schema({
     upload: { type: Strings },
     description: { type: Strings },
 
+    // ** Shift Type Change Request**
+    shiftChangeRequest: {
+        requestedShift: { type: String },
+        status: {
+            type: String,
+            enum: ['Pending', 'Approved', 'Rejected'],
+            default: 'Pending',
+        },
+        requestedAt: { type: Date },
+        reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
+    },
     requestedOn: { type: Date, default: Date.now },
 });
 

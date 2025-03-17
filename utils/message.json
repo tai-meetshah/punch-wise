@@ -41,7 +41,7 @@
     "login": "Please login first.",
     "blocked": "Sorry! You are blocked, Please contact Admin.",
     "deleted": "Your account has been deleted.",
-    "alreadyRegistered": "Email is already registerd.",
+    "alreadyRegistered": "Phone is already registerd.",
     "alreadyRegisteredUser": "Username already exists. Please choose a different user name.",
     "removeSpace": "Username cannot contain spaces.",
     "allOfferUsed": "All the offer card used, Make Payment to Create new offer.",
@@ -60,6 +60,7 @@
     "otpRequired": "Please provide phone number and otp.",
 
     "otpSentEmail": "OTP sent to your email.",
+    "otpSentPhone": "OTP sent to your Phone.",
     "otpRequiredEmail": "Please provide email and otp.",
 
     "google": "Please log in with Google.",

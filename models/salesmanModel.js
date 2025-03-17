@@ -8,12 +8,10 @@ const validate = require('../utils/message.json');
 const salesmanSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: [true, validate.error.name],
         trim: true,
     },
     email: {
         type: String,
-        required: [true, validate.error.email],
         unique: true,
         lowercase: true,
         validate: [validator.isEmail, validate.error.emailInvalid],
@@ -45,12 +43,13 @@ const salesmanSchema = new mongoose.Schema({
     certificate: {
         type: String,
     },
+    employeeType: {
+        type: String,
+    },
     company: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true,
         ref: 'Company',
     },
-
     joiningDate: String,
 
     paymentType: String,

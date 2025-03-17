@@ -55,40 +55,27 @@ exports.isSalesman = async (req, res, next) => {
 
 exports.sendRegisterOTP = async (req, res, next) => {
     try {
-        let { name, email } = req.body;
-
-        name = name?.toLowerCase().trim();
-        email = email?.trim();
+        let { phone } = req.body;
 
         const userExist = await Salesman.findOne({
-            $or: [{ name }, { email }],
+            phone: phone,
         });
-
-        if (userExist) {
-            if (userExist.name === name) {
-                return next(
-                    createError.Conflict(message.error.alreadyRegisteredUser)
-                );
-            } else {
-                return next(
-                    createError.Conflict(message.error.alreadyRegistered)
-                );
-            }
-        }
+        if (userExist)
+            return next(createError.Conflict(message.error.alreadyRegistered));
 
         const otp = generateCode(4);
         await SalesmanOTP.updateOne(
-            { email },
+            { phone },
             { otp, createdAt: Date.now() + 5 * 60 * 1000 },
             { upsert: true }
         );
 
         //! set CLIENT_URL in env
-        sendVerificationEmail(email, otp);
+        // sendVerificationEmail(phone, otp);
 
         res.json({
             success: true,
-            message: message.error.otpSentEmail,
+            message: message.error.otpSentPhone,
             otp, //! Remove otp
         });
     } catch (error) {
@@ -98,24 +85,16 @@ exports.sendRegisterOTP = async (req, res, next) => {
 
 exports.verifyRegisterOTP = async (req, res, next) => {
     try {
-        const email = req.body.email.trim();
-        let otp = await SalesmanOTP.findOne({ email });
+        const phone = req.body.phone.trim();
+        let otp = await SalesmanOTP.findOne({ phone });
         if (!otp || otp.otp != req.body.otp)
             return next(createError.BadRequest(message.error.otpFail));
 
         const user = await Salesman.create({
-            name: req.body.name,
-            email: email,
+            phone: phone,
             password: req.body.password,
             fcmToken: req.body.fcmToken,
         });
-
-        const userData = {
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            fcmToken: user.fcmToken,
-        };
 
         const token = user.generateAuthToken();
 
@@ -123,7 +102,39 @@ exports.verifyRegisterOTP = async (req, res, next) => {
             success: true,
             message: message.success.registerSuccefully,
             token,
-            user: userData,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.createProfile = async (req, res, next) => {
+    try {
+        const salesman = req.salesman;
+
+        salesman.name = req.body.name;
+        salesman.dob = req.body.dob;
+        salesman.gender = req.body.gender;
+        salesman.address = req.body.address;
+        salesman.city = req.body.city;
+        salesman.state = req.body.state;
+        salesman.email = req.body.email;
+        salesman.company = req.body.company;
+        salesman.employeeType = req.body.employeeType;
+
+        salesman.idProof = req.files.idProof
+            ? `/uploads/${req.files.idProof[0].filename}`
+            : '';
+        salesman.certificate = req.files.certificate
+            ? `/uploads/${req.files.certificate[0].filename}`
+            : '';
+
+        await salesman.save();
+
+        res.json({
+            success: true,
+            message: 'Salesman profile crated sucessfully.',
+            salesman,
         });
     } catch (error) {
         next(error);
@@ -160,23 +171,42 @@ exports.resendOTP = async (req, res, next) => {
     }
 };
 
+exports.loginPhoneCheck = async (req, res, next) => {
+    try {
+        const { phone } = req.body;
+        if (!phone) return next(createError.BadRequest('Provide phone no.'));
+
+        const user = await Salesman.findOne({ phone });
+        if (!user) return next(createError.BadRequest('Salesman not found.'));
+
+        res.json({
+            success: true,
+            message: 'Salesman verified.',
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 exports.login = async (req, res, next) => {
     try {
-        let { name, password } = req.body;
-        if (!name || !password)
+        let { phone, password } = req.body;
+        if (!phone || !password)
             return next(createError.BadRequest(message.error.namePassword));
 
-        name = name.toLowerCase().trim();
+        phone = phone.trim();
 
         const user = await Salesman.findOne({
-            $or: [{ email: name }, { name }],
-        }).select('+password +isDeleted');
+            phone: phone,
+        }).select('+password +isDeleted +blocked');
 
         if (!user || !(await user.correctPassword(password, user.password)))
             return next(createError.BadRequest(message.error.credentials));
 
         if (user.isDeleted)
             return next(createError.Unauthorized(message.error.deleted));
+        if (user.blocked)
+            return next(createError.Unauthorized(message.error.blocked));
 
         const token = user.generateAuthToken();
 
@@ -192,7 +222,7 @@ exports.login = async (req, res, next) => {
             success: true,
             message: message.success.loginSuccefully,
             token,
-            user,
+            salesman: user,
         });
     } catch (error) {
         next(error);

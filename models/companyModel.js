@@ -49,6 +49,7 @@ const companySchema = new mongoose.Schema({
     },
     address: {
         type: String,
+        trim: true,
     },
     city: {
         type: String,
