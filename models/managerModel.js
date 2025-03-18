@@ -45,7 +45,6 @@ const managerSchema = new mongoose.Schema({
     },
     company: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true,
         ref: 'Company',
     },
     joiningDate: String,

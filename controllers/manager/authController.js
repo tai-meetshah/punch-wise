@@ -9,8 +9,13 @@ const { ManagerOTP } = require('../../models/otpModel');
 
 exports.checkManager = async (req, res, next) => {
     try {
-        const token = req.headers['authorization'];
-
+        let token = req.headers['authorization'];
+        if (
+            req.headers.authorization &&
+            req.headers.authorization.startsWith('Bearer')
+        ) {
+            token = req.headers.authorization.split(' ')[1];
+        }
         if (!token)
             return next(createError.Unauthorized(message.error.provideToken));
 
@@ -35,7 +40,13 @@ exports.checkManager = async (req, res, next) => {
 
 exports.isManager = async (req, res, next) => {
     try {
-        const token = req.headers['authorization'];
+        let token = req.headers['authorization'];
+        if (
+            req.headers.authorization &&
+            req.headers.authorization.startsWith('Bearer')
+        ) {
+            token = req.headers.authorization.split(' ')[1];
+        }
 
         if (!token) return next();
 
@@ -51,42 +62,33 @@ exports.isManager = async (req, res, next) => {
     }
 };
 
+// step 1
 exports.sendRegisterOTP = async (req, res, next) => {
     try {
-        let { name, email } = req.body;
-
-        name = name?.toLowerCase().trim();
-        email = email?.trim();
+        let { phone } = req.body;
+        if (!phone) return next(createError.BadRequest('please enter phone.'));
 
         const userExist = await Manager.findOne({
-            $or: [{ name }, { email }],
+            phone: phone,
         });
-
-        if (userExist) {
-            if (userExist.name === name) {
-                return next(
-                    createError.Conflict(message.error.alreadyRegisteredUser)
-                );
-            } else {
-                return next(
-                    createError.Conflict(message.error.alreadyRegistered)
-                );
-            }
-        }
+        if (userExist)
+            return next(
+                createError.BadRequest(message.error.alreadyRegistered)
+            );
 
         const otp = generateCode(4);
         await ManagerOTP.updateOne(
-            { email },
+            { phone },
             { otp, createdAt: Date.now() + 5 * 60 * 1000 },
             { upsert: true }
         );
 
         //! set CLIENT_URL in env
-        sendVerificationEmail(email, otp);
+        // sendVerificationEmail(phone, otp);
 
         res.json({
             success: true,
-            message: message.error.otpSentEmail,
+            message: message.error.otpSentPhone,
             otp, //! Remove otp
         });
     } catch (error) {
@@ -94,34 +96,98 @@ exports.sendRegisterOTP = async (req, res, next) => {
     }
 };
 
+// step 2
 exports.verifyRegisterOTP = async (req, res, next) => {
     try {
-        const email = req.body.email.trim();
-        let otp = await ManagerOTP.findOne({ email });
+        const phone = req.body.phone.trim();
+        let otp = await ManagerOTP.findOne({ phone });
+
         if (!otp || otp.otp != req.body.otp)
             return next(createError.BadRequest(message.error.otpFail));
 
+        const token = jwt.sign({ phone }, process.env.JWT_SECRET, {
+            expiresIn: '1d',
+        });
+
+        res.status(201).json({
+            success: true,
+            message: 'OTP verify Succefully',
+            token,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// step 3
+exports.createPin = async (req, res, next) => {
+    try {
+        const decoded = jwt.verify(
+            req.body.verifyToken,
+            process.env.JWT_SECRET
+        );
+        if (!decoded.phone)
+            return next(createError.BadRequest('Invalid token.'));
+        if (decoded.phone !== req.body.phone)
+            return next(createError.BadRequest('Invalid token.'));
+
         const user = await Manager.create({
-            name: req.body.name,
-            email: email,
+            phone: req.body.phone,
             password: req.body.password,
             fcmToken: req.body.fcmToken,
         });
 
-        const userData = {
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            fcmToken: user.fcmToken,
-        };
-
         const token = user.generateAuthToken();
 
-        res.status(201).json({
+        res.json({
             success: true,
-            message: message.success.registerSuccefully,
+            message: 'PIN created successfully!',
             token,
-            user: userData,
+        });
+    } catch (error) {
+        if (
+            error.message == 'jwt expired' ||
+            error.message == 'invalid signature'
+        )
+            return next(createError.BadRequest(message.error.tokenInvalid));
+        next(error);
+    }
+};
+
+// step 4
+exports.createProfile = async (req, res, next) => {
+    try {
+        const manager = req.manager;
+
+        manager.name = req.body.name;
+        manager.dob = req.body.dob;
+        manager.gender = req.body.gender;
+        manager.address = req.body.address;
+        manager.city = req.body.city;
+        manager.state = req.body.state;
+        manager.email = req.body.email;
+        manager.company = req.body.company;
+        manager.employeeType = req.body.employeeType;
+
+        manager.idProof = req.files.idProof
+            ? `/uploads/${req.files.idProof[0].filename}`
+            : '';
+        manager.certificate = req.files.certificate
+            ? `/uploads/${req.files.certificate[0].filename}`
+            : '';
+
+        await manager.save();
+
+        manager.password = undefined;
+        manager.isDeleted = undefined;
+        manager.date = undefined;
+        manager.blocked = undefined;
+        manager.__v = undefined;
+
+        res.json({
+            success: true,
+            message: 'manager profile crated sucessfully.',
+            manager,
         });
     } catch (error) {
         next(error);
@@ -130,23 +196,21 @@ exports.verifyRegisterOTP = async (req, res, next) => {
 
 exports.resendOTP = async (req, res, next) => {
     try {
-        let { email } = req.body;
-        if (!email)
-            return next(
-                createError.BadRequest('Please provide an email address.')
-            );
+        let { phone } = req.body;
+        if (!phone)
+            return next(createError.BadRequest('Please provide phone number.'));
 
-        email = email.trim();
+        phone = phone.trim();
 
         const otp = generateCode(4);
 
         await ManagerOTP.updateOne(
-            { email },
+            { phone },
             { otp, createdAt: Date.now() + 5 * 60 * 1000 },
             { upsert: true }
         );
 
-        sendVerificationEmail(email, otp);
+        // sendVerificationphone(phone, otp);
 
         res.json({
             success: true,
@@ -158,23 +222,42 @@ exports.resendOTP = async (req, res, next) => {
     }
 };
 
+exports.loginPhoneCheck = async (req, res, next) => {
+    try {
+        const { phone } = req.body;
+        if (!phone) return next(createError.BadRequest('Provide phone no.'));
+
+        const user = await Manager.findOne({ phone });
+        if (!user) return next(createError.BadRequest('Manager not found.'));
+
+        res.json({
+            success: true,
+            message: 'Manager verified.',
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 exports.login = async (req, res, next) => {
     try {
-        let { name, password } = req.body;
-        if (!name || !password)
+        let { phone, password } = req.body;
+        if (!phone || !password)
             return next(createError.BadRequest(message.error.namePassword));
 
-        name = name.toLowerCase().trim();
+        phone = phone.trim();
 
         const user = await Manager.findOne({
-            $or: [{ email: name }, { name }],
-        }).select('+password +isDeleted');
+            phone: phone,
+        }).select('+password +isDeleted +blocked');
 
         if (!user || !(await user.correctPassword(password, user.password)))
             return next(createError.BadRequest(message.error.credentials));
 
         if (user.isDeleted)
             return next(createError.Unauthorized(message.error.deleted));
+        if (user.blocked)
+            return next(createError.Unauthorized(message.error.blocked));
 
         const token = user.generateAuthToken();
 
@@ -182,15 +265,16 @@ exports.login = async (req, res, next) => {
         await user.save();
 
         user.password = undefined;
-        user.favourites = undefined;
+        user.isDeleted = undefined;
         user.date = undefined;
+        user.blocked = undefined;
         user.__v = undefined;
 
         res.json({
             success: true,
             message: message.success.loginSuccefully,
             token,
-            user,
+            manager: user,
         });
     } catch (error) {
         next(error);
@@ -199,23 +283,23 @@ exports.login = async (req, res, next) => {
 
 exports.forgotPassword = async (req, res, next) => {
     try {
-        const user = await Manager.findOne({ email: req.body.email.trim() });
+        const user = await Manager.findOne({ phone: req.body.phone.trim() });
         if (!user)
             return next(createError.NotFound(message.error.notRegistered));
 
         const otp = generateCode(4);
         await ManagerOTP.updateOne(
-            { email: user.email },
+            { phone: user.phone },
             { otp, createdAt: Date.now() + 5 * 60 * 1000 },
             { upsert: true }
         );
 
         //! set CLIENT_URL in env
-        sendOtp(user.email, otp);
+        // sendOtp(user.phone, otp);
 
         res.json({
             success: true,
-            message: message.error.otpSentEmail,
+            message: message.error.otpSentPhone,
             otp, //! Remove otp
         });
     } catch (error) {
@@ -225,15 +309,15 @@ exports.forgotPassword = async (req, res, next) => {
 
 exports.verifyOTP = async (req, res, next) => {
     try {
-        const email = req.body.email.trim();
+        const phone = req.body.phone.trim();
 
         // check otp
-        let otp = await ManagerOTP.findOne({ email });
+        let otp = await ManagerOTP.findOne({ phone });
         if (!otp || otp.otp != req.body.otp)
             return next(createError.BadRequest(message.error.otpFail));
 
         // generate verifyToken
-        const verifyToken = jwt.sign({ email }, process.env.JWT_SECRET, {
+        const verifyToken = jwt.sign({ phone }, process.env.JWT_SECRET, {
             expiresIn: '1d',
         });
 
@@ -253,10 +337,10 @@ exports.resetPassword = async (req, res, next) => {
             req.body.verifyToken,
             process.env.JWT_SECRET
         );
-        if (!decoded.email)
+        if (!decoded.phone)
             return next(createError.BadRequest('Invalid token.'));
 
-        const user = await Manager.findOne({ email: decoded.email });
+        const user = await Manager.findOne({ phone: decoded.phone });
         if (!user) return next(createError.BadRequest('Invalid token.'));
 
         user.password = req.body.password;

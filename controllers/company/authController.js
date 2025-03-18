@@ -4,8 +4,8 @@ const generateCode = require('../../utils/generateCode');
 const message = require('../../utils/message.json');
 const { sendOtp, sendVerificationEmail } = require('../../utils/sendMail');
 
-const Salesman = require('../../models/salesmanModel');
-const { SalesmanOTP } = require('../../models/otpModel');
+const Manager = require('../../models/managerModel');
+const { ManagerOTP, ManagerOTP } = require('../../models/otpModel');
 
 // To ensure that a valid user is logged in.
 exports.checkSalesman = async (req, res, next) => {
@@ -17,7 +17,7 @@ exports.checkSalesman = async (req, res, next) => {
 
         const decoded = await jwt.verify(token, process.env.JWT_SECRET);
 
-        const user = await Salesman.findById(decoded._id).select(
+        const user = await Manager.findById(decoded._id).select(
             '+password +blocked'
         );
 
@@ -77,7 +77,7 @@ exports.sendRegisterOTP = async (req, res, next) => {
         }
 
         const otp = generateCode(4);
-        await SalesmanOTP.updateOne(
+        await ManagerOTP.updateOne(
             { email },
             { otp, createdAt: Date.now() + 5 * 60 * 1000 },
             { upsert: true }
@@ -99,7 +99,7 @@ exports.sendRegisterOTP = async (req, res, next) => {
 exports.verifyRegisterOTP = async (req, res, next) => {
     try {
         const email = req.body.email.trim();
-        let otp = await SalesmanOTP.findOne({ email });
+        let otp = await ManagerOTP.findOne({ email });
         if (!otp || otp.otp != req.body.otp)
             return next(createError.BadRequest(message.error.otpFail));
 
@@ -142,7 +142,7 @@ exports.resendOTP = async (req, res, next) => {
 
         const otp = generateCode(4);
 
-        await SalesmanOTP.updateOne(
+        await ManagerOTP.updateOne(
             { email },
             { otp, createdAt: Date.now() + 5 * 60 * 1000 },
             { upsert: true }
@@ -201,23 +201,23 @@ exports.login = async (req, res, next) => {
 
 exports.forgotPassword = async (req, res, next) => {
     try {
-        const user = await Salesman.findOne({ email: req.body.email.trim() });
+        const user = await Manager.findOne({ phone: req.body.phone.trim() });
         if (!user)
             return next(createError.NotFound(message.error.notRegistered));
 
         const otp = generateCode(4);
-        await SalesmanOTP.updateOne(
-            { email: user.email },
+        await ManagerOTP.updateOne(
+            { phone: user.phone },
             { otp, createdAt: Date.now() + 5 * 60 * 1000 },
             { upsert: true }
         );
 
         //! set CLIENT_URL in env
-        sendOtp(user.email, otp);
+        // sendOtp(user.phone, otp);
 
         res.json({
             success: true,
-            message: message.error.otpSentEmail,
+            message: message.error.otpSentPhone,
             otp, //! Remove otp
         });
     } catch (error) {
@@ -227,15 +227,15 @@ exports.forgotPassword = async (req, res, next) => {
 
 exports.verifyOTP = async (req, res, next) => {
     try {
-        const email = req.body.email.trim();
+        const phone = req.body.phone.trim();
 
         // check otp
-        let otp = await SalesmanOTP.findOne({ email });
+        let otp = await ManagerOTP.findOne({ phone });
         if (!otp || otp.otp != req.body.otp)
             return next(createError.BadRequest(message.error.otpFail));
 
         // generate verifyToken
-        const verifyToken = jwt.sign({ email }, process.env.JWT_SECRET, {
+        const verifyToken = jwt.sign({ phone }, process.env.JWT_SECRET, {
             expiresIn: '1d',
         });
 
@@ -255,10 +255,10 @@ exports.resetPassword = async (req, res, next) => {
             req.body.verifyToken,
             process.env.JWT_SECRET
         );
-        if (!decoded.email)
+        if (!decoded.phone)
             return next(createError.BadRequest('Invalid token.'));
 
-        const user = await Salesman.findOne({ email: decoded.email });
+        const user = await Salesman.findOne({ phone: decoded.phone });
         if (!user) return next(createError.BadRequest('Invalid token.'));
 
         user.password = req.body.password;

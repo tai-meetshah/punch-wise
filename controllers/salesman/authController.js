@@ -42,8 +42,13 @@ exports.checkSalesman = async (req, res, next) => {
 // Just check if valid user is logged, doesn't throw error if not
 exports.isSalesman = async (req, res, next) => {
     try {
-        const token = req.headers['authorization'];
-
+        let token = req.headers['authorization'];
+        if (
+            req.headers.authorization &&
+            req.headers.authorization.startsWith('Bearer')
+        ) {
+            token = req.headers.authorization.split(' ')[1];
+        }
         if (!token) return next();
 
         const decoded = await jwt.verify(token, process.env.JWT_SECRET);
@@ -279,23 +284,23 @@ exports.login = async (req, res, next) => {
 
 exports.forgotPassword = async (req, res, next) => {
     try {
-        const user = await Salesman.findOne({ email: req.body.email.trim() });
+        const user = await Salesman.findOne({ phone: req.body.phone.trim() });
         if (!user)
             return next(createError.NotFound(message.error.notRegistered));
 
         const otp = generateCode(4);
         await SalesmanOTP.updateOne(
-            { email: user.email },
+            { phone: user.phone },
             { otp, createdAt: Date.now() + 5 * 60 * 1000 },
             { upsert: true }
         );
 
         //! set CLIENT_URL in env
-        sendOtp(user.email, otp);
+        // sendOtp(user.phone, otp);
 
         res.json({
             success: true,
-            message: message.error.otpSentEmail,
+            message: message.error.otpSentPhone,
             otp, //! Remove otp
         });
     } catch (error) {
@@ -305,15 +310,15 @@ exports.forgotPassword = async (req, res, next) => {
 
 exports.verifyOTP = async (req, res, next) => {
     try {
-        const email = req.body.email.trim();
+        const phone = req.body.phone.trim();
 
         // check otp
-        let otp = await SalesmanOTP.findOne({ email });
+        let otp = await SalesmanOTP.findOne({ phone });
         if (!otp || otp.otp != req.body.otp)
             return next(createError.BadRequest(message.error.otpFail));
 
         // generate verifyToken
-        const verifyToken = jwt.sign({ email }, process.env.JWT_SECRET, {
+        const verifyToken = jwt.sign({ phone }, process.env.JWT_SECRET, {
             expiresIn: '1d',
         });
 
@@ -333,10 +338,10 @@ exports.resetPassword = async (req, res, next) => {
             req.body.verifyToken,
             process.env.JWT_SECRET
         );
-        if (!decoded.email)
+        if (!decoded.phone)
             return next(createError.BadRequest('Invalid token.'));
 
-        const user = await Salesman.findOne({ email: decoded.email });
+        const user = await Salesman.findOne({ phone: decoded.phone });
         if (!user) return next(createError.BadRequest('Invalid token.'));
 
         user.password = req.body.password;
