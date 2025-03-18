@@ -3,7 +3,7 @@ const fileUpload = require('express-fileupload');
 
 const { checkSalesman } = require('../../controllers/salesman/authController');
 const { upload } = require('../../controllers/uploadController');
-const dashboardController = require('../../controllers/salesman/dashboardController');
+const leaveController = require('../../controllers/salesman/leaveController');
 
 router.get('/get-profile', checkSalesman, dashboardController.getProfile);
 

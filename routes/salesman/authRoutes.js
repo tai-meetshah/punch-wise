@@ -3,6 +3,7 @@ const fileUpload = require('express-fileupload');
 
 const { checkSalesman } = require('../../controllers/salesman/authController');
 const authController = require('../../controllers/salesman/authController');
+const { upload } = require('../../controllers/uploadController');
 
 router.post('/send-signup-otp', fileUpload(), authController.sendRegisterOTP);
 
@@ -10,6 +11,12 @@ router.post(
     '/verify-signup-otp',
     fileUpload(),
     authController.verifyRegisterOTP
+);
+
+router.post(
+    '/create-pin',
+    fileUpload(),
+    authController.createPin
 );
 
 router.route('/create-profile').post(

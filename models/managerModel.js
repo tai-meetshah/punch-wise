@@ -8,12 +8,10 @@ const validate = require('../utils/message.json');
 const managerSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: [true, validate.error.name],
         trim: true,
     },
     email: {
         type: String,
-        required: [true, validate.error.email],
         unique: true,
         lowercase: true,
         validate: [validator.isEmail, validate.error.emailInvalid],

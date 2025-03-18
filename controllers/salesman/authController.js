@@ -10,8 +10,13 @@ const { SalesmanOTP } = require('../../models/otpModel');
 // To ensure that a valid user is logged in.
 exports.checkSalesman = async (req, res, next) => {
     try {
-        const token = req.headers['authorization'];
-
+        let token = req.headers['authorization'];
+        if (
+            req.headers.authorization &&
+            req.headers.authorization.startsWith('Bearer')
+        ) {
+            token = req.headers.authorization.split(' ')[1];
+        }
         if (!token)
             return next(createError.Unauthorized(message.error.provideToken));
 
@@ -53,15 +58,19 @@ exports.isSalesman = async (req, res, next) => {
     }
 };
 
+// step 1
 exports.sendRegisterOTP = async (req, res, next) => {
     try {
         let { phone } = req.body;
+        if (!phone) return next(createError.BadRequest('please enter phone.'));
 
         const userExist = await Salesman.findOne({
             phone: phone,
         });
         if (userExist)
-            return next(createError.Conflict(message.error.alreadyRegistered));
+            return next(
+                createError.BadRequest(message.error.alreadyRegistered)
+            );
 
         const otp = generateCode(4);
         await SalesmanOTP.updateOne(
@@ -83,24 +92,22 @@ exports.sendRegisterOTP = async (req, res, next) => {
     }
 };
 
+// step 2
 exports.verifyRegisterOTP = async (req, res, next) => {
     try {
         const phone = req.body.phone.trim();
         let otp = await SalesmanOTP.findOne({ phone });
+
         if (!otp || otp.otp != req.body.otp)
             return next(createError.BadRequest(message.error.otpFail));
 
-        const user = await Salesman.create({
-            phone: phone,
-            password: req.body.password,
-            fcmToken: req.body.fcmToken,
+        const token = jwt.sign({ phone }, process.env.JWT_SECRET, {
+            expiresIn: '1d',
         });
-
-        const token = user.generateAuthToken();
 
         res.status(201).json({
             success: true,
-            message: message.success.registerSuccefully,
+            message: 'OTP verify Succefully',
             token,
         });
     } catch (error) {
@@ -108,6 +115,42 @@ exports.verifyRegisterOTP = async (req, res, next) => {
     }
 };
 
+// step 3
+exports.createPin = async (req, res, next) => {
+    try {
+        const decoded = jwt.verify(
+            req.body.verifyToken,
+            process.env.JWT_SECRET
+        );
+        if (!decoded.phone)
+            return next(createError.BadRequest('Invalid token.'));
+        if (decoded.phone !== req.body.phone)
+            return next(createError.BadRequest('Invalid token.'));
+
+        const user = await Salesman.create({
+            phone: req.body.phone,
+            password: req.body.password,
+            fcmToken: req.body.fcmToken,
+        });
+
+        const token = user.generateAuthToken();
+
+        res.json({
+            success: true,
+            message: 'PIN created successfully!',
+            token,
+        });
+    } catch (error) {
+        if (
+            error.message == 'jwt expired' ||
+            error.message == 'invalid signature'
+        )
+            return next(createError.BadRequest(message.error.tokenInvalid));
+        next(error);
+    }
+};
+
+// step 4
 exports.createProfile = async (req, res, next) => {
     try {
         const salesman = req.salesman;
@@ -131,6 +174,12 @@ exports.createProfile = async (req, res, next) => {
 
         await salesman.save();
 
+        salesman.password = undefined;
+        salesman.isDeleted = undefined;
+        salesman.date = undefined;
+        salesman.blocked = undefined;
+        salesman.__v = undefined;
+
         res.json({
             success: true,
             message: 'Salesman profile crated sucessfully.',
@@ -143,23 +192,21 @@ exports.createProfile = async (req, res, next) => {
 
 exports.resendOTP = async (req, res, next) => {
     try {
-        let { email } = req.body;
-        if (!email)
-            return next(
-                createError.BadRequest('Please provide an email address.')
-            );
+        let { phone } = req.body;
+        if (!phone)
+            return next(createError.BadRequest('Please provide phone number.'));
 
-        email = email.trim();
+        phone = phone.trim();
 
         const otp = generateCode(4);
 
         await SalesmanOTP.updateOne(
-            { email },
+            { phone },
             { otp, createdAt: Date.now() + 5 * 60 * 1000 },
             { upsert: true }
         );
 
-        sendVerificationEmail(email, otp);
+        // sendVerificationphone(phone, otp);
 
         res.json({
             success: true,
@@ -214,8 +261,9 @@ exports.login = async (req, res, next) => {
         await user.save();
 
         user.password = undefined;
-        user.favourites = undefined;
+        user.isDeleted = undefined;
         user.date = undefined;
+        user.blocked = undefined;
         user.__v = undefined;
 
         res.json({
