@@ -6,14 +6,13 @@ const Manager = require('../../models/managerModel');
 
 exports.getProfile = async (req, res, next) => {
     try {
-        const vendor = { ...req.manager._doc };
+        const manager = { ...req.manager._doc };
 
-        delete vendor.password;
-        delete vendor.favourites;
-        delete vendor.__v;
-        delete vendor.date;
+        delete manager.password;
+        delete manager.__v;
+        delete manager.date;
 
-        res.json({ success: true, vendor });
+        res.json({ success: true, manager });
     } catch (error) {
         next(error);
     }
@@ -23,7 +22,7 @@ exports.editProfile = async (req, res, next) => {
     try {
         if (req.file) req.body.photo = `/uploads/${req.file.filename}`;
 
-        delete req.body.email;
+        delete req.body.phone;
         delete req.body.password;
 
         const vendor = await Manager.findByIdAndUpdate(
@@ -38,7 +37,7 @@ exports.editProfile = async (req, res, next) => {
         res.json({
             success: true,
             message: message.success.profileUpdateSuccefully,
-            vendor,
+            manager: vendor,
         });
     } catch (error) {
         next(error);

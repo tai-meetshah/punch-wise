@@ -148,7 +148,7 @@ exports.resendOTP = async (req, res, next) => {
             { upsert: true }
         );
 
-        sendVerificationEmail(email, otp);
+        // sendVerificationEmail(email, otp);
 
         res.json({
             success: true,

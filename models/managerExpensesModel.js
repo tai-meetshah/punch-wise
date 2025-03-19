@@ -11,8 +11,7 @@ const expensesSchema = new mongoose.Schema({
         ref: 'Company',
     },
 
-    fromDate: { type: Date, required: true },
-    toDate: { type: Date, required: true },
+    date: { type: Date, required: true },
     expensesFor: { type: String, required: true },
     amount: { type: String, required: true },
     description: { type: String, required: true },
@@ -23,7 +22,7 @@ const expensesSchema = new mongoose.Schema({
         enum: ['Pending', 'Approved', 'Rejected', 'Cancelled'],
         default: 'Pending',
     },
-    rejectReason: { type: Strings },
+    rejectReason: { type: String },
 
     createdAt: {
         type: Date,

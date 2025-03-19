@@ -1,75 +1,80 @@
-const Leave = require('../../models/salesmanLeaveModel');
+const Expenses = require('../../models/salesmanExpensesModel');
 const moment = require('moment');
 
-exports.addLeave = async (req, res, next) => {
+exports.addExpenses = async (req, res, next) => {
     try {
-        const leave = await Leave.create({
+        const expenses = await Expenses.create({
             salesman: req.salesman.id,
-            leaveType: req.body.leaveType,
-            fromDate: req.body.fromDate,
-            toDate: req.body.toDate,
-            halfDay: req.body.halfDay,
-            notes: req.body.notes,
+            date: req.body.date,
+            expensesFor: req.body.expensesFor,
+            amount: req.body.amount,
+            description: req.body.description,
+            receipt: req.files.receipt
+                ? `/uploads/${req.files.receipt[0].filename}`
+                : '',
         });
 
         return res.json({
             success: true,
-            message: 'Leave request submited succefully',
-            leave,
+            message: 'Expenses request submited succefully',
+            expenses,
         });
     } catch (error) {
         next(error);
     }
 };
 
-exports.editLeave = async (req, res, next) => {
+exports.editExpenses = async (req, res, next) => {
     try {
-        const leave = await Leave.findOne({
+        const expenses = await Expenses.findOne({
             _id: req.params.id,
             status: 'Pending',
         });
-        if (!leave)
-            return res.status(404).json({
-                success: false,
-                message: 'Pending leave request not found or cannot be edited',
-            });
-
-        leave.leaveType = req.body.leaveType;
-        leave.fromDate = req.body.fromDate;
-        leave.toDate = req.body.toDate;
-        leave.halfDay = req.body.halfDay;
-        leave.notes = req.body.notes;
-
-        await leave.save();
-
-        res.json({
-            success: true,
-            message: 'Leave edited successfully',
-            leave,
-        });
-    } catch (error) {
-        next(error);
-    }
-};
-
-exports.cancelLeave = async (req, res, next) => {
-    try {
-        const leave = await Leave.findOne({
-            _id: req.params.id,
-            status: 'Pending',
-        });
-        if (!leave)
+        if (!expenses)
             return res.status(404).json({
                 success: false,
                 message:
-                    'Pending leave request not found or cannot be cancelled',
+                    'Pending expenses request not found or cannot be edited',
             });
 
-        await Leave.findByIdAndDelete(req.params.id);
+        expenses.date = req.body.date;
+        expenses.expensesFor = req.body.expensesFor;
+        expenses.amount = req.body.amount;
+        expenses.description = req.body.description;
+        expenses.receipt = req.files.receipt
+            ? `/uploads/${req.files.receipt[0].filename}`
+            : '';
+
+        await expenses.save();
 
         res.json({
             success: true,
-            message: 'Leave request cancelled successfully',
+            message: 'expenses edited successfully',
+            expenses,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.cancelExpenses = async (req, res, next) => {
+    try {
+        const expenses = await Expenses.findOne({
+            _id: req.params.id,
+            status: 'Pending',
+        });
+        if (!expenses)
+            return res.status(404).json({
+                success: false,
+                message:
+                    'Pending expenses request not found or cannot be cancelled',
+            });
+
+        await Expenses.findByIdAndDelete(req.params.id);
+
+        res.json({
+            success: true,
+            message: 'Expenses request cancelled successfully',
         });
     } catch (error) {
         next(error);
@@ -102,34 +107,29 @@ const getDateRange = filter => {
     }
 };
 
-exports.leaveList = async (req, res, next) => {
+exports.expensesList = async (req, res, next) => {
     try {
         const { status, dateFilter, startDate, endDate } = req.query;
         let query = {};
 
         if (status) query.status = status;
-
         if (dateFilter) {
             const dateRange = getDateRange(dateFilter);
 
-            query.fromDate = { $gte: dateRange.fromDate };
-            query.toDate = { $lte: dateRange.toDate };
+            query.date = { $gte: dateRange.fromDate, $lte: dateRange.toDate };
         }
-
         // Handle custom date range
         if (startDate && endDate) {
-            query.fromDate = { $gte: new Date(startDate) };
-            query.toDate = { $lte: new Date(endDate) };
+            query.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
         }
 
-        const leaves = await Leave.find(query)
-            .populate('manager')
+        const expenses = await Expenses.find(query)
             .populate('company')
             .select('-__v -salesman');
 
         res.json({
             success: true,
-            leaves,
+            expenses,
         });
     } catch (error) {
         console.error(error);

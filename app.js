@@ -69,6 +69,8 @@ app.use('/uploads/*', (req, res) => res.status(404).end());
 app.use('/api/salesman', require('./routes/salesman/authRoutes'));
 app.use('/api/salesman', require('./routes/salesman/cmsRoutes'));
 app.use('/api/salesman', require('./routes/salesman/dashboardRoutes'));
+app.use('/api/salesman', require('./routes/salesman/leaveRoutes'));
+app.use('/api/salesman', require('./routes/salesman/expensesRoutes'));
 
 // 3) manager ROUTES
 app.use('/api/manager', require('./routes/manager/authRoutes'));

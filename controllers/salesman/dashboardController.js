@@ -6,15 +6,14 @@ const Salesman = require('../../models/salesmanModel');
 
 exports.getProfile = async (req, res, next) => {
     try {
-        const user = { ...req.salesman._doc };
+        const salesman = { ...req.salesman._doc };
 
         // Hide fields
-        delete user.password;
-        delete user.favourites;
-        delete user.__v;
-        delete user.date;
+        delete salesman.password;
+        delete salesman.__v;
+        delete salesman.date;
 
-        res.json({ success: true, user });
+        res.json({ success: true, salesman });
     } catch (error) {
         next(error);
     }
@@ -25,7 +24,7 @@ exports.editProfile = async (req, res, next) => {
         if (req.file) req.body.photo = `/uploads/${req.file.filename}`;
 
         // Not allowed to change
-        delete req.body.email;
+        delete req.body.phone;
         delete req.body.password;
 
         const user = await Salesman.findByIdAndUpdate(
@@ -40,7 +39,7 @@ exports.editProfile = async (req, res, next) => {
         res.json({
             success: true,
             message: message.success.profileUpdateSuccefully,
-            user,
+            salesman: user,
         });
     } catch (error) {
         next(error);

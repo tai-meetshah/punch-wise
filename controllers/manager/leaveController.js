@@ -1,7 +1,9 @@
 const createError = require('http-errors');
 const message = require('../../utils/message.json');
-const Leave = require('../../models/salesmanLeaveModel');
+const SalesmanLeave = require('../../models/salesmanLeaveModel');
+const Leave = require('../../models/managerLeaveModel');
 
+// Manager change leave status of salesman
 exports.changeLeaveStatus = async (req, res, next) => {
     try {
         const { status, rejectReason } = req.body;
@@ -13,7 +15,7 @@ exports.changeLeaveStatus = async (req, res, next) => {
                     "Invalid status. Allowed values: 'Approved', 'Rejected'.",
             });
 
-        const leave = await Leave.findById(req.params.id);
+        const leave = await SalesmanLeave.findById(req.params.id);
         if (!leave)
             return res
                 .status(404)
@@ -29,6 +31,81 @@ exports.changeLeaveStatus = async (req, res, next) => {
             success: true,
             message: `Leave status updated to ${status} successfully`,
             leave,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Manager post leave for self
+exports.addLeave = async (req, res, next) => {
+    try {
+        const leave = await Leave.create({
+            salesman: req.salesman.id,
+            leaveType: req.body.leaveType,
+            fromDate: req.body.fromDate,
+            toDate: req.body.toDate,
+            halfDay: req.body.halfDay,
+            notes: req.body.notes,
+        });
+
+        return res.json({
+            success: true,
+            message: 'Leave request submited succefully',
+            leave,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.editLeave = async (req, res, next) => {
+    try {
+        const leave = await Leave.findOne({
+            _id: req.params.id,
+            status: 'Pending',
+        });
+        if (!leave)
+            return res.status(404).json({
+                success: false,
+                message: 'Pending leave request not found or cannot be edited',
+            });
+
+        leave.leaveType = req.body.leaveType;
+        leave.fromDate = req.body.fromDate;
+        leave.toDate = req.body.toDate;
+        leave.halfDay = req.body.halfDay;
+
+        await leave.save();
+
+        res.json({
+            success: true,
+            message: 'Leave edited successfully',
+            leave,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.cancelLeave = async (req, res, next) => {
+    try {
+        const leave = await Leave.findOne({
+            _id: req.params.id,
+            status: 'Pending',
+        });
+        if (!leave)
+            return res.status(404).json({
+                success: false,
+                message:
+                    'Pending leave request not found or cannot be cancelled',
+            });
+
+        await Leave.findByIdAndDelete(req.params.id);
+
+        res.json({
+            success: true,
+            message: 'Leave request cancelled successfully',
         });
     } catch (error) {
         next(error);
