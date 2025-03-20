@@ -76,6 +76,8 @@ app.use('/api/salesman', require('./routes/salesman/expensesRoutes'));
 app.use('/api/manager', require('./routes/manager/authRoutes'));
 app.use('/api/manager', require('./routes/manager/cmsRoutes'));
 app.use('/api/manager', require('./routes/manager/dashboardRoutes'));
+app.use('/api/manager', require('./routes/manager/leaveRoutes'));
+app.use('/api/manager', require('./routes/manager/expensesRoutes'));
 
 // 404 api
 app.use('/api', (req, res, next) => {

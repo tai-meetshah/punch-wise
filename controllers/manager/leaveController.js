@@ -37,6 +37,28 @@ exports.changeLeaveStatus = async (req, res, next) => {
     }
 };
 
+exports.salesmanLeaveRequests = async (req, res, next) => {
+    try {
+        const leave = await SalesmanLeave.find()
+            .populate('salesman', 'name')
+            .select('-manager -__v')
+            .lean();
+        if (!leave || leave.length === 0)
+            return res
+                .status(404)
+                .json({ success: false, message: 'Leave request not found' });
+
+        leave.manager = undefined;
+
+        res.json({
+            success: true,
+            leave,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 // Manager post leave for self
 exports.addLeave = async (req, res, next) => {
     try {

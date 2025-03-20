@@ -1,10 +1,67 @@
-const Expenses = require('../../models/salesmanExpensesModel');
+const Expenses = require('../../models/managerExpensesModel');
+const SalesmanExpenses = require('../../models/salesmanExpensesModel');
+
 const moment = require('moment');
+
+// Manager change status of salesman
+exports.changeExpensesStatus = async (req, res, next) => {
+    try {
+        const { status, rejectReason } = req.body;
+
+        if (!['Approved', 'Rejected'].includes(status))
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Invalid status. Allowed values: 'Approved', 'Rejected'.",
+            });
+
+        const leave = await SalesmanExpenses.findById(req.params.id);
+        if (!leave)
+            return res
+                .status(404)
+                .json({ success: false, message: 'Leave request not found' });
+
+        leave.status = status;
+        leave.rejectReason = rejectReason;
+        leave.manager = req.manager.id;
+
+        await leave.save();
+
+        res.json({
+            success: true,
+            message: `Leave status updated to ${status} successfully`,
+            expenses: leave,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.salesmanExpensesRequests = async (req, res, next) => {
+    try {
+        const leave = await SalesmanExpenses.find()
+            .populate('salesman', 'name')
+            .select('-manager -__v')
+            .lean();
+        if (!leave || leave.length === 0)
+            return res.status(404).json({
+                success: false,
+                message: 'expenses request not found',
+            });
+
+        res.json({
+            success: true,
+            expenses: leave,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
 
 exports.addExpenses = async (req, res, next) => {
     try {
         const expenses = await Expenses.create({
-            salesman: req.salesman.id,
+            manager: req.manager.id,
             date: req.body.date,
             expensesFor: req.body.expensesFor,
             amount: req.body.amount,
@@ -124,9 +181,10 @@ exports.expensesList = async (req, res, next) => {
         }
 
         const expenses = await Expenses.find(query)
-            .populate('manager')
             .populate('company')
-            .select('-__v -salesman');
+            .populate('manager')
+            .populate('salesman')
+            .select('-__v -manager');
 
         res.json({
             success: true,
