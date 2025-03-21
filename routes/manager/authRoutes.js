@@ -21,6 +21,7 @@ router.post(
 
 router.route('/create-profile').post(
     upload.fields([
+        { name: 'photo', maxCount: 1 },
         { name: 'idProof', maxCount: 1 },
         { name: 'certificate', maxCount: 1 },
     ]),

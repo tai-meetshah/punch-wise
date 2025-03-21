@@ -170,6 +170,9 @@ exports.createProfile = async (req, res, next) => {
         salesman.company = req.body.company;
         salesman.employeeType = req.body.employeeType;
 
+        salesman.photo = req.files.photo
+            ? `/uploads/${req.files.photo[0].filename}`
+            : '';
         salesman.idProof = req.files.idProof
             ? `/uploads/${req.files.idProof[0].filename}`
             : '';

@@ -13,15 +13,12 @@ router.post(
     authController.verifyRegisterOTP
 );
 
-router.post(
-    '/create-pin',
-    fileUpload(),
-    authController.createPin
-);
+router.post('/create-pin', fileUpload(), authController.createPin);
 
 router.route('/create-profile').post(
     upload.fields([
         { name: 'idProof', maxCount: 1 },
+        { name: 'photo', maxCount: 1 },
         { name: 'certificate', maxCount: 1 },
     ]),
     checkSalesman,
