@@ -77,7 +77,7 @@ const salesmanSchema = new mongoose.Schema({
             },
             validate.error.password,
         ],
-        minlength: [6, validate.error.passwordLength],
+        minlength: [4, validate.error.passwordLength],
         trim: true,
         select: false,
     },
