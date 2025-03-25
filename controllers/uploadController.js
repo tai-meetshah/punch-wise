@@ -13,7 +13,11 @@ exports.upload = multer({
     limits: { fileSize: 1024 * 1024 * 10 },
     fileFilter: (req, file, cb) => {
         // reject a file
-        if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png')
+        if (
+            file.mimetype === 'image/jpeg' ||
+            file.mimetype === 'image/png' ||
+            file.mimetype === 'image/jpg'
+        )
             cb(null, true);
         else
             cb(createError.BadRequest('Please upload jpg or png file.'), false);
@@ -44,7 +48,11 @@ exports.uploadMedia = multer({
     limits: { fileSize: 1024 * 1024 * 10 },
     fileFilter: (req, file, cb) => {
         // reject a file
-        if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png')
+        if (
+            file.mimetype === 'image/jpeg' ||
+            file.mimetype === 'image/png' ||
+            file.mimetype === 'image/jpg'
+        )
             cb(null, true);
         else cb(new Error('Please upload jpg or png file.'), false);
     },

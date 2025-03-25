@@ -8,7 +8,6 @@ const validate = require('../utils/message.json');
 const companySchema = new mongoose.Schema({
     name: {
         type: String,
-        required: [true, validate.error.name],
         trim: true,
     },
     salesman: [
@@ -31,9 +30,7 @@ const companySchema = new mongoose.Schema({
     ],
     email: {
         type: String,
-        required: [true, validate.error.email],
         unique: true,
-        lowercase: true,
         validate: [validator.isEmail, validate.error.emailInvalid],
     },
     phone: {

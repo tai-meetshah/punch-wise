@@ -288,7 +288,7 @@ exports.forgotPassword = async (req, res, next) => {
     try {
         const user = await Manager.findOne({ phone: req.body.phone.trim() });
         if (!user)
-            return next(createError.NotFound(message.error.notRegistered));
+            return next(createError.NotFound(message.error.notRegisteredPhone));
 
         const otp = generateCode(4);
         await ManagerOTP.updateOne(
