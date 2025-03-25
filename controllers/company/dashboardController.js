@@ -52,15 +52,15 @@ exports.changePasswordCheck = async (req, res, next) => {
         const user = req.company;
         const { password } = req.body;
         if (!password)
-            return next(createError.BadRequest('Please provide passcode.'));
+            return next(createError.BadRequest('Please provide PIN.'));
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch)
-            return next(createError.BadRequest('Passcode incorrect.'));
+            return next(createError.BadRequest('PIN incorrect.'));
 
         res.json({
             success: true,
-            message: 'passcode match succefully.',
+            message: 'PIN match succefully.',
         });
     } catch (error) {
         next(error);
