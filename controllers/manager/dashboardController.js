@@ -44,6 +44,26 @@ exports.editProfile = async (req, res, next) => {
     }
 };
 
+exports.changePasswordCheck = async (req, res, next) => {
+    try {
+        const user = req.manager;
+        const { password } = req.body;
+        if (!password)
+            return next(createError.BadRequest('Please provide passcode.'));
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch)
+            return next(createError.BadRequest('Passcode incorrect.'));
+
+        res.json({
+            success: true,
+            message: 'passcode match succefully.',
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 exports.changePassword = async (req, res, next) => {
     try {
         const vendor = req.manager;

@@ -15,6 +15,13 @@ router.post(
 );
 
 router.post(
+    '/change-password-check',
+    fileUpload(),
+    checkManager,
+    dashboardController.changePasswordCheck
+);
+
+router.post(
     '/change-password',
     fileUpload(),
     checkManager,
