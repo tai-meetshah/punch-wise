@@ -10,6 +10,10 @@ const companySchema = new mongoose.Schema({
         type: String,
         trim: true,
     },
+    role: {
+        type: String,
+        default: 'Company',
+    },
     salesman: [
         {
             type: mongoose.Schema.Types.ObjectId,
@@ -76,6 +80,7 @@ const companySchema = new mongoose.Schema({
 
     blocked: { type: Boolean, default: false, select: false, immutable: true },
     date: { type: Date, default: Date.now },
+    profileComplted: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false, select: false },
 });
 

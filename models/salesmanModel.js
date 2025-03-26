@@ -10,6 +10,10 @@ const salesmanSchema = new mongoose.Schema({
         type: String,
         trim: true,
     },
+    role: {
+        type: String,
+        default: 'Salesman',
+    },
     email: {
         type: String,
         unique: true,
@@ -89,6 +93,7 @@ const salesmanSchema = new mongoose.Schema({
 
     blocked: { type: Boolean, default: false, select: false, immutable: true },
     date: { type: Date, default: Date.now },
+    profileComplted: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false, select: false },
 });
 

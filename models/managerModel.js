@@ -10,6 +10,10 @@ const managerSchema = new mongoose.Schema({
         type: String,
         trim: true,
     },
+    role: {
+        type: String,
+        default: 'Manager',
+    },
     email: {
         type: String,
         unique: true,
@@ -91,6 +95,7 @@ const managerSchema = new mongoose.Schema({
     appleId: String,
 
     date: { type: Date, default: Date.now },
+    profileComplted: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false, select: false },
 });
 

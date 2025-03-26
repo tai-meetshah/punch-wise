@@ -159,6 +159,7 @@ exports.createProfile = async (req, res, next) => {
     try {
         const manager = req.manager;
 
+        manager.profileComplted = true;
         manager.name = req.body.name;
         manager.dob = req.body.dob;
         manager.gender = req.body.gender;

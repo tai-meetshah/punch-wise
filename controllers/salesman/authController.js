@@ -161,6 +161,7 @@ exports.createProfile = async (req, res, next) => {
         const salesman = req.salesman;
 
         salesman.name = req.body.name;
+        salesman.profileComplted = true;
         salesman.dob = req.body.dob;
         salesman.gender = req.body.gender;
         salesman.address = req.body.address;
