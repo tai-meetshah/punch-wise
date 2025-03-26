@@ -80,7 +80,7 @@ const companySchema = new mongoose.Schema({
 
     blocked: { type: Boolean, default: false, select: false, immutable: true },
     date: { type: Date, default: Date.now },
-    profileComplted: { type: Boolean, default: false },
+    step: { type: Number, required: true, default: 0 },
     isDeleted: { type: Boolean, default: false, select: false },
 });
 

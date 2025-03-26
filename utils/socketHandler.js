@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
-
+const mongoose = require('mongoose');
+const fs = require('fs');
+const path = require('path');
 const Chat = require('../models/chatMessageModel');
 const Salesman = require('../models/salesmanModel');
 const Manager = require('../models/managerModel');
@@ -20,79 +22,44 @@ module.exports = io => {
         socket.on('recentChats', async data => {
             try {
                 const { token } = data;
-
                 const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                const userId = new mongoose.Types.ObjectId(decoded._id);
 
-                const userId = decoded._id;
+                // Aggregate recent chats
                 const recentChats = await Chat.aggregate([
                     {
                         $match: {
-                            $or: [
-                                {
-                                    sender: new mongoose.Types.ObjectId(
-                                        userId.toString()
-                                    ),
-                                },
-                                {
-                                    receiver: new mongoose.Types.ObjectId(
-                                        userId.toString()
-                                    ),
-                                },
-                            ],
-                            deletedBy: {
-                                $ne: new mongoose.Types.ObjectId(
-                                    userId.toString()
-                                ),
-                            },
+                            $or: [{ senderId: userId }, { receiverId: userId }],
+                            deletedBy: { $ne: userId },
                         },
                     },
-                    {
-                        $sort: { date: -1 }, // Sort messages by most recent
-                    },
+                    { $sort: { date: -1 } }, // Sort by most recent messages
                     {
                         $group: {
                             _id: {
                                 chatWith: {
                                     $cond: [
-                                        {
-                                            $eq: [
-                                                '$sender',
-                                                new mongoose.Types.ObjectId(
-                                                    userId.toString()
-                                                ),
-                                            ],
-                                        },
-                                        '$receiver',
-                                        '$sender',
+                                        { $eq: ['$senderId', userId] },
+                                        '$receiverId',
+                                        '$senderId',
                                     ],
                                 },
                             },
                             chatId: { $first: '$_id' },
                             lastMessage: { $first: '$message' },
                             lastMessageDate: { $first: '$date' },
-                            lastMessageSender: { $first: '$sender' },
-                            lastMessageReceiver: {
-                                $first: '$receiver',
-                            },
+                            lastMessageSender: { $first: '$senderId' },
+                            lastMessageReceiver: { $first: '$receiverId' },
                             unreadCount: {
                                 $sum: {
                                     $cond: [
                                         {
                                             $and: [
-                                                {
-                                                    $ne: [
-                                                        '$sender',
-                                                        new mongoose.Types.ObjectId(
-                                                            userId.toString()
-                                                        ),
-                                                    ],
-                                                },
+                                                { $ne: ['$senderId', userId] },
                                                 {
                                                     $not: {
                                                         $in: [
-                                                            new mongoose.Types.ObjectId(
-                                                                userId.toString()
-                                                            ),
+                                                            userId,
                                                             {
                                                                 $ifNull: [
                                                                     '$readBy',
@@ -111,39 +78,33 @@ module.exports = io => {
                             },
                         },
                     },
-                    {
-                        $lookup: {
-                            from: 'users',
-                            localField: '_id.chatWith',
-                            foreignField: '_id',
-                            as: 'chatWithUser',
-                        },
-                    },
-                    {
-                        $unwind: '$chatWithUser',
-                    },
-                    {
-                        $project: {
-                            chatWithName: '$chatWithUser.name',
-                            images: '$chatWithUser.images',
-                            lastMessage: 1,
-                            lastMessageDate: 1,
-                            lastMessageSender: 1,
-                            lastMessageReceiver: 1,
-                            unreadCount: 1,
-                            _id: 0,
-                            chatId: 1,
-                        },
-                    },
-                    {
-                        $sort: { lastMessageDate: -1 }, // Ensure sorting by latest message
-                    },
                 ]);
+
+                // Fetch chat participants dynamically from their respective models
+                for (let chat of recentChats) {
+                    const chatWithId = chat._id.chatWith;
+                    let userDetails = null;
+
+                    const userModels = ['Salesman', 'Manager', 'Company'];
+                    for (let modelName of userModels) {
+                        const model = mongoose.model(modelName);
+                        userDetails = await model
+                            .findById(chatWithId)
+                            .select('name images');
+                        if (userDetails) break; // Stop once found
+                    }
+
+                    chat.chatWith = userDetails || {
+                        _id: null,
+                        name: 'Deleted User',
+                        images: [],
+                    };
+                }
 
                 socket.emit('recentChats', recentChats);
             } catch (error) {
-                console.error('Error retrieving old messages:', error.message);
-                socket.emit('chatMessages', {
+                console.error('Error retrieving recent chats:', error.message);
+                socket.emit('recentChats', {
                     success: false,
                     error: error.message,
                 });
@@ -152,44 +113,63 @@ module.exports = io => {
 
         socket.on('getChatMessages', async data => {
             try {
-                const { token, sender, receiver } = data;
+                const {
+                    token,
+                    senderId,
+                    senderType,
+                    receiverId,
+                    receiverType,
+                } = data;
 
                 const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                const userId = decoded._id;
+
+                if (
+                    !['Salesman', 'Manager', 'Company'].includes(senderType) ||
+                    !['Salesman', 'Manager', 'Company'].includes(receiverType)
+                )
+                    throw new Error('Invalid sender or receiver type');
 
                 const messageData = await Chat.find({
                     $or: [
-                        { sender: sender, receiver: receiver },
-                        { sender: receiver, receiver: sender },
+                        { senderId, senderType, receiverId, receiverType },
+                        {
+                            senderId: receiverId,
+                            senderType: receiverType,
+                            receiverId: senderId,
+                            receiverType: senderType,
+                        },
                     ],
-                    deletedBy: { $ne: decoded._id },
+                    deletedBy: { $ne: userId }, // Exclude messages deleted by this user
                 })
-                    .populate({
-                        path: 'sender',
-                        select: 'name images fcmToken',
-                    })
-                    .populate({
-                        path: 'receiver',
-                        select: 'name images fcmToken',
-                    })
-                    .select('-__v -deletedBy')
-                    .sort({ date: -1 });
+                    .sort({ date: -1 })
+                    .lean();
 
-                const messages = messageData.map(msg => ({
-                    ...msg.toObject(),
-                    sender: msg.sender || {
+                // Fetch sender & receiver details dynamically
+                for (let msg of messageData) {
+                    const senderModel = mongoose.model(msg.senderType);
+                    const receiverModel = mongoose.model(msg.receiverType);
+
+                    msg.sender = (await senderModel
+                        .findById(msg.senderId)
+                        .select('name images fcmToken')) || {
                         _id: null,
                         name: 'Deleted User',
                         images: [],
-                    },
-                    receiver: msg.receiver || {
+                    };
+
+                    msg.receiver = (await receiverModel
+                        .findById(msg.receiverId)
+                        .select('name images fcmToken')) || {
                         _id: null,
                         name: 'Deleted User',
                         images: [],
-                    },
-                }));
-                socket.emit('chatMessages', messages);
+                    };
+                }
+
+                socket.emit('chatMessages', messageData);
             } catch (error) {
-                console.error('Error retrieving old messages:', error.message);
+                console.error('Error retrieving messages:', error.message);
                 socket.emit('chatMessages', {
                     success: false,
                     error: error.message,
@@ -199,14 +179,21 @@ module.exports = io => {
 
         socket.on('sendMessage', async data => {
             try {
-                const { token, receiverId, receiverType, message, image } =
-                    data;
+                const {
+                    token,
+                    senderType,
+                    receiverId,
+                    receiverType,
+                    message,
+                    image,
+                } = data;
 
                 const decoded = jwt.verify(token, process.env.JWT_SECRET);
                 const senderId = decoded._id;
-                const senderType = decoded.role; // Ensure role exists in your token payload
 
                 if (!['Salesman', 'Manager', 'Company'].includes(receiverType))
+                    throw new Error('Invalid receiver type');
+                if (!['Salesman', 'Manager', 'Company'].includes(senderType))
                     throw new Error('Invalid receiver type');
 
                 let fileName = null;
@@ -257,9 +244,6 @@ module.exports = io => {
 
                 if (!receiverUser) throw new Error('Receiver not found');
 
-                console.log('receiverModel: ', receiverModel);
-                console.log('receiverUser:', receiverUser);
-
                 // const notification = await Notification.create({
                 //     sentTo: [receiverId],
                 //     title: 'New Message',
@@ -295,17 +279,30 @@ module.exports = io => {
 
         socket.on('clearChat', async data => {
             try {
-                const { token, receiver } = data;
-
+                const { token, receiverId } = data;
                 const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                const senderId = new mongoose.Types.ObjectId(decoded._id);
 
-                const senderId = decoded._id;
+                // Check if chat exists between sender and receiver
+                const chatExists = await Chat.findOne({
+                    $or: [
+                        { sender: senderId, receiver: receiverId },
+                        { sender: receiverId, receiver: senderId },
+                    ],
+                });
 
-                const result = await Chat.updateMany(
+                if (!chatExists)
+                    return socket.emit('chatCleared', {
+                        success: false,
+                        message: 'No chat history found.',
+                    });
+
+                // Mark chat as deleted for the sender
+                await Chat.updateMany(
                     {
                         $or: [
-                            { sender: senderId, receiver },
-                            { sender: receiver, receiver: senderId },
+                            { sender: senderId, receiver: receiverId },
+                            { sender: receiverId, receiver: senderId },
                         ],
                     },
                     { $addToSet: { deletedBy: senderId } }
@@ -313,10 +310,10 @@ module.exports = io => {
 
                 socket.emit('chatCleared', {
                     success: true,
-                    message: 'Cleared chat successfully.',
+                    message: 'Chat cleared successfully.',
                 });
             } catch (error) {
-                console.error('Error sending message:', error.message);
+                console.error('Error clearing chat:', error.message);
                 socket.emit('chatCleared', {
                     success: false,
                     error: error.message,
@@ -327,25 +324,46 @@ module.exports = io => {
         socket.on('messageRead', async data => {
             try {
                 const { token, senderId } = data;
-
                 const decoded = jwt.verify(token, process.env.JWT_SECRET);
-                const receiverId = decoded._id;
+                const receiverId = new mongoose.Types.ObjectId(decoded._id);
+
+                const unreadMessages = await Chat.find({
+                    sender: senderId,
+                    receiver: receiverId,
+                    readBy: { $ne: receiverId }, // Only find unread messages
+                });
+
+                if (unreadMessages.length === 0)
+                    return socket.emit('messageReadByReceiver', {
+                        success: false,
+                        message: 'No unread messages found.',
+                    });
 
                 await Chat.updateMany(
                     {
                         sender: senderId,
                         receiver: receiverId,
-                        readBy: { $ne: receiverId }, // Only update messages not already read
+                        readBy: { $ne: receiverId },
                     },
                     { $addToSet: { readBy: receiverId } }
                 );
 
                 socket.emit('messageReadByReceiver', {
                     success: true,
-                    message: 'Message Read By Receiver successfully.',
+                    message: 'Messages marked as read successfully.',
                 });
+
+                // Optionally, notify sender that their messages were read
+                // socket.to(senderId).emit('messageReadNotification', {
+                //     success: true,
+                //     message: `Your messages to ${receiverId} have been read.`,
+                // });
             } catch (error) {
-                console.error('Error sending message:', error.message);
+                console.error('Error marking messages as read:', error.message);
+                socket.emit('messageReadByReceiver', {
+                    success: false,
+                    error: error.message,
+                });
             }
         });
     });

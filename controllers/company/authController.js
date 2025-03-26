@@ -3,21 +3,28 @@ const createError = require('http-errors');
 const generateCode = require('../../utils/generateCode');
 const message = require('../../utils/message.json');
 const { sendOtp, sendVerificationEmail } = require('../../utils/sendMail');
+const parseOpeningHours = require('../../utils/parseOpeningHours');
 
-const Manager = require('../../models/managerModel');
-const { ManagerOTP, ManagerOTP } = require('../../models/otpModel');
+const Company = require('../../models/companyModel');
+const Business = require('../../models/businessModel');
+const { CompanyOTP } = require('../../models/otpModel');
 
 // To ensure that a valid user is logged in.
-exports.checkSalesman = async (req, res, next) => {
+exports.checkCompany = async (req, res, next) => {
     try {
-        const token = req.headers['authorization'];
-
+        let token = req.headers['authorization'];
+        if (
+            req.headers.authorization &&
+            req.headers.authorization.startsWith('Bearer')
+        ) {
+            token = req.headers.authorization.split(' ')[1];
+        }
         if (!token)
             return next(createError.Unauthorized(message.error.provideToken));
 
         const decoded = await jwt.verify(token, process.env.JWT_SECRET);
 
-        const user = await Manager.findById(decoded._id).select(
+        const user = await Company.findById(decoded._id).select(
             '+password +blocked'
         );
 
@@ -27,7 +34,7 @@ exports.checkSalesman = async (req, res, next) => {
         if (user.isDeleted)
             return next(createError.Unauthorized(message.error.deleted));
 
-        req.salesman = user;
+        req.company = user;
         next();
     } catch (error) {
         next(error);
@@ -35,17 +42,22 @@ exports.checkSalesman = async (req, res, next) => {
 };
 
 // Just check if valid user is logged, doesn't throw error if not
-exports.isSalesman = async (req, res, next) => {
+exports.isCompany = async (req, res, next) => {
     try {
-        const token = req.headers['authorization'];
-
+        let token = req.headers['authorization'];
+        if (
+            req.headers.authorization &&
+            req.headers.authorization.startsWith('Bearer')
+        ) {
+            token = req.headers.authorization.split(' ')[1];
+        }
         if (!token) return next();
 
         const decoded = await jwt.verify(token, process.env.JWT_SECRET);
 
-        const user = await Salesman.findById(decoded._id).select('+password');
+        const user = await Company.findById(decoded._id).select('+password');
 
-        if (user) req.salesman = user;
+        if (user) req.company = user;
 
         next();
     } catch (error) {
@@ -53,42 +65,33 @@ exports.isSalesman = async (req, res, next) => {
     }
 };
 
+// step 1
 exports.sendRegisterOTP = async (req, res, next) => {
     try {
-        let { name, email } = req.body;
+        let { phone } = req.body;
+        if (!phone) return next(createError.BadRequest('please enter phone.'));
 
-        name = name?.toLowerCase().trim();
-        email = email?.trim();
-
-        const userExist = await Salesman.findOne({
-            $or: [{ name }, { email }],
+        const userExist = await Company.findOne({
+            phone: phone,
         });
-
-        if (userExist) {
-            if (userExist.name === name) {
-                return next(
-                    createError.Conflict(message.error.alreadyRegisteredUser)
-                );
-            } else {
-                return next(
-                    createError.Conflict(message.error.alreadyRegistered)
-                );
-            }
-        }
+        if (userExist)
+            return next(
+                createError.BadRequest(message.error.alreadyRegistered)
+            );
 
         const otp = generateCode(4);
-        await ManagerOTP.updateOne(
-            { email },
+        await CompanyOTP.updateOne(
+            { phone },
             { otp, createdAt: Date.now() + 5 * 60 * 1000 },
             { upsert: true }
         );
 
         //! set CLIENT_URL in env
-        sendVerificationEmail(email, otp);
+        // sendVerificationEmail(phone, otp);
 
         res.json({
             success: true,
-            message: message.error.otpSentEmail,
+            message: message.error.otpSentPhone,
             otp, //! Remove otp
         });
     } catch (error) {
@@ -96,34 +99,188 @@ exports.sendRegisterOTP = async (req, res, next) => {
     }
 };
 
+// step 2
 exports.verifyRegisterOTP = async (req, res, next) => {
     try {
-        const email = req.body.email.trim();
-        let otp = await ManagerOTP.findOne({ email });
+        const phone = req.body.phone.trim();
+        let otp = await CompanyOTP.findOne({ phone });
+
         if (!otp || otp.otp != req.body.otp)
             return next(createError.BadRequest(message.error.otpFail));
 
-        const user = await Salesman.create({
-            name: req.body.name,
-            email: email,
+        const token = jwt.sign({ phone }, process.env.JWT_SECRET, {
+            expiresIn: '1d',
+        });
+
+        res.status(201).json({
+            success: true,
+            message: 'OTP verify Succefully',
+            token,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// step 3
+exports.createPin = async (req, res, next) => {
+    try {
+        const decoded = jwt.verify(
+            req.body.verifyToken,
+            process.env.JWT_SECRET
+        );
+        if (!decoded.phone)
+            return next(createError.BadRequest('Invalid token.'));
+        if (decoded.phone !== req.body.phone)
+            return next(createError.BadRequest('Invalid token.'));
+
+        const user = await Company.create({
+            phone: req.body.phone,
             password: req.body.password,
             fcmToken: req.body.fcmToken,
         });
 
-        const userData = {
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            fcmToken: user.fcmToken,
-        };
-
         const token = user.generateAuthToken();
 
-        res.status(201).json({
+        res.json({
             success: true,
-            message: message.success.registerSuccefully,
+            message: 'PIN created successfully!',
             token,
-            user: userData,
+        });
+    } catch (error) {
+        if (
+            error.message == 'jwt expired' ||
+            error.message == 'invalid signature'
+        )
+            return next(createError.BadRequest(message.error.tokenInvalid));
+        next(error);
+    }
+};
+
+// step 4
+exports.createProfile = async (req, res, next) => {
+    try {
+        const company = req.company;
+
+        company.step = 1;
+        company.name = req.body.name;
+        company.dob = req.body.dob;
+        company.gender = req.body.gender;
+        company.address = req.body.address;
+        company.city = req.body.city;
+        company.state = req.body.state;
+        company.email = req.body.email;
+        company.company = req.body.company;
+        company.employeeType = req.body.employeeType;
+
+        company.photo = req.files.photo
+            ? `/uploads/${req.files.photo[0].filename}`
+            : '';
+        company.idProof = req.files.idProof
+            ? `/uploads/${req.files.idProof[0].filename}`
+            : '';
+        company.certificate = req.files.certificate
+            ? `/uploads/${req.files.certificate[0].filename}`
+            : '';
+
+        await company.save();
+
+        company.password = undefined;
+        company.isDeleted = undefined;
+        company.date = undefined;
+        company.blocked = undefined;
+        company.__v = undefined;
+
+        res.json({
+            success: true,
+            message: 'company profile crated sucessfully.',
+            company,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// step 5
+exports.createBusiness = async (req, res, next) => {
+    try {
+        const company = req.company;
+
+        const business = await Business.create({
+            company: company.id,
+            password: req.body.password,
+            businessName: req.body.businessName,
+            businessRegistrationType: req.body.businessRegistrationType,
+            businessCategory: req.body.businessCategory,
+
+            yearEstablish: req.body.yearEstablish,
+            workingHours: req.body.workingHours,
+            workingDays: parseOpeningHours(req.body.workingDays),
+
+            businessWebsite: req.body.businessWebsite,
+            businessPhone: req.body.businessPhone,
+            businessAlternatePhone: req.body.businessAlternatePhone,
+            businessEmail: req.body.businessEmail,
+            businessAddress: req.body.businessAddress,
+            businessCity: req.body.businessCity,
+            businessState: req.body.businessState,
+            businessCountry: req.body.businessCountry,
+            businessPincode: req.body.businessPincode,
+        });
+
+        company.step = 2;
+        await company.save();
+
+        res.json({
+            success: true,
+            step: 2,
+            message: ' Business created sucessfully.',
+            business,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// step 6
+exports.addBusinessImages = async (req, res, next) => {
+    try {
+        const company = req.company;
+        const businessID = await Business.findOne({ company }).select('id');
+
+        const businessLogo = req.file
+            ? `/uploads/${req.files.businessLogo[0].filename}`
+            : undefined;
+        const businessSupportDoc = req.file
+            ? `/uploads/${req.files.businessSupportDoc[0].filename}`
+            : undefined;
+        const businessLicense = req.file
+            ? `/uploads/${req.files.businessLicense[0].filename}`
+            : undefined;
+        const businessTin = req.file
+            ? `/uploads/${req.files.businessTin[0].filename}`
+            : undefined;
+
+        const business = await Business.findByIdAndUpdate(
+            businessID,
+            {
+                businessLogo,
+                businessSupportDoc,
+                businessLicense,
+                businessTin,
+                step: 3,
+            },
+            { new: true }
+        ).select('-__v -updatedAt');
+
+        company.step = 3;
+        await company.save();
+
+        res.json({
+            success: true,
+            step: 3,
+            message: ' Business images added sucessfully.',
+            business,
         });
     } catch (error) {
         next(error);
@@ -132,23 +289,21 @@ exports.verifyRegisterOTP = async (req, res, next) => {
 
 exports.resendOTP = async (req, res, next) => {
     try {
-        let { email } = req.body;
-        if (!email)
-            return next(
-                createError.BadRequest('Please provide an email address.')
-            );
+        let { phone } = req.body;
+        if (!phone)
+            return next(createError.BadRequest('Please provide phone number.'));
 
-        email = email.trim();
+        phone = phone.trim();
 
         const otp = generateCode(4);
 
-        await ManagerOTP.updateOne(
-            { email },
+        await CompanyOTP.updateOne(
+            { phone },
             { otp, createdAt: Date.now() + 5 * 60 * 1000 },
             { upsert: true }
         );
 
-        // sendVerificationEmail(email, otp);
+        // sendVerificationphone(phone, otp);
 
         res.json({
             success: true,
@@ -160,23 +315,42 @@ exports.resendOTP = async (req, res, next) => {
     }
 };
 
+exports.loginPhoneCheck = async (req, res, next) => {
+    try {
+        const { phone } = req.body;
+        if (!phone) return next(createError.BadRequest('Provide phone no.'));
+
+        const user = await Company.findOne({ phone });
+        if (!user) return next(createError.BadRequest('Company not found.'));
+
+        res.json({
+            success: true,
+            message: 'Company verified.',
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 exports.login = async (req, res, next) => {
     try {
-        let { name, password } = req.body;
-        if (!name || !password)
+        let { phone, password } = req.body;
+        if (!phone || !password)
             return next(createError.BadRequest(message.error.namePassword));
 
-        name = name.toLowerCase().trim();
+        phone = phone.trim();
 
-        const user = await Salesman.findOne({
-            $or: [{ email: name }, { name }],
-        }).select('+password +isDeleted');
+        const user = await Company.findOne({
+            phone: phone,
+        }).select('+password +isDeleted +blocked');
 
         if (!user || !(await user.correctPassword(password, user.password)))
             return next(createError.BadRequest(message.error.credentials));
 
         if (user.isDeleted)
             return next(createError.Unauthorized(message.error.deleted));
+        if (user.blocked)
+            return next(createError.Unauthorized(message.error.blocked));
 
         const token = user.generateAuthToken();
 
@@ -184,15 +358,16 @@ exports.login = async (req, res, next) => {
         await user.save();
 
         user.password = undefined;
-        user.favourites = undefined;
+        user.isDeleted = undefined;
         user.date = undefined;
+        user.blocked = undefined;
         user.__v = undefined;
 
         res.json({
             success: true,
             message: message.success.loginSuccefully,
             token,
-            user,
+            company: user,
         });
     } catch (error) {
         next(error);
@@ -201,12 +376,12 @@ exports.login = async (req, res, next) => {
 
 exports.forgotPassword = async (req, res, next) => {
     try {
-        const user = await Manager.findOne({ phone: req.body.phone.trim() });
+        const user = await Company.findOne({ phone: req.body.phone.trim() });
         if (!user)
             return next(createError.NotFound(message.error.notRegisteredPhone));
 
         const otp = generateCode(4);
-        await ManagerOTP.updateOne(
+        await CompanyOTP.updateOne(
             { phone: user.phone },
             { otp, createdAt: Date.now() + 5 * 60 * 1000 },
             { upsert: true }
@@ -230,7 +405,7 @@ exports.verifyOTP = async (req, res, next) => {
         const phone = req.body.phone.trim();
 
         // check otp
-        let otp = await ManagerOTP.findOne({ phone });
+        let otp = await CompanyOTP.findOne({ phone });
         if (!otp || otp.otp != req.body.otp)
             return next(createError.BadRequest(message.error.otpFail));
 
@@ -258,7 +433,7 @@ exports.resetPassword = async (req, res, next) => {
         if (!decoded.phone)
             return next(createError.BadRequest('Invalid token.'));
 
-        const user = await Salesman.findOne({ phone: decoded.phone });
+        const user = await Company.findOne({ phone: decoded.phone });
         if (!user) return next(createError.BadRequest('Invalid token.'));
 
         user.password = req.body.password;
@@ -280,25 +455,25 @@ exports.resetPassword = async (req, res, next) => {
 
 exports.deleteUser = async (req, res) => {
     try {
-        const user = await Salesman.findByIdAndUpdate(req.salesman.id, {
+        const user = await Company.findByIdAndUpdate(req.company.id, {
             isDeleted: true,
         });
-        if (!user) return next(createError.Unauthorized('Salesman not found!'));
+        if (!user) return next(createError.Unauthorized('Company not found!'));
 
         const suffix = uniqueSuffix();
 
-        await Salesman.findByIdAndUpdate(req.params.id, {
+        await Company.findByIdAndUpdate(req.params.id, {
             email: user.email + `${suffix}`,
             name: user.name + `${suffix}`,
         });
 
         res.json({
             success: true,
-            message: 'Salesman deleted successfully.',
+            message: 'Company deleted successfully.',
         });
     } catch (error) {
         if (error.name == 'CastError')
-            return next(createError.NotFound('Salesman not found.'));
+            return next(createError.NotFound('Company not found.'));
         next(error);
     }
 };

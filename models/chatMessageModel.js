@@ -1,19 +1,54 @@
 const mongoose = require('mongoose');
 
-const chatMessageSchema = new mongoose.Schema({
-    bookingId: { type: mongoose.Schema.Types.ObjectId, ref: 'Booking' },
-
-    rideId: { type: mongoose.Schema.Types.ObjectId, ref: 'Ride' },
-
-    sender: { type: String, required: [true, 'sender is required.'] },
-    receiver: { type: String, required: [true, 'receiver is required.'] },
+const chatSchema = new mongoose.Schema({
+    senderId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+    },
+    senderType: {
+        type: String,
+        enum: ['Salesman', 'Manager', 'Company'],
+        required: true,
+    },
+    receiverId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+    },
+    receiverType: {
+        type: String,
+        enum: ['Salesman', 'Manager', 'Company'],
+        required: true,
+    },
     message: {
         type: String,
+        required: true,
         trim: true,
-        required: [true, 'Message is required.'],
     },
+    file: { type: String },
 
-    createdAt: { type: Date, default: Date.now },
+    //! in readby Salesman manager any come
+    readBy: [
+        {
+            userId: { type: mongoose.Schema.Types.ObjectId },
+            userType: {
+                type: String,
+                enum: ['Salesman', 'Manager', 'Company'],
+            },
+        },
+    ],
+    deletedBy: [
+        {
+            userId: { type: mongoose.Schema.Types.ObjectId },
+            userType: {
+                type: String,
+                enum: ['Salesman', 'Manager', 'Company'],
+            },
+        },
+    ],
+    date: {
+        type: Date,
+        default: Date.now,
+    },
 });
 
-module.exports = mongoose.model('Chat Message', chatMessageSchema);
+module.exports = new mongoose.model('Chat', chatSchema);
