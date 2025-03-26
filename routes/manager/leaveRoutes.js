@@ -16,6 +16,7 @@ router.post(
     leaveController.changeLeaveStatus
 );
 
+router.get('/leave-list', checkManager, leaveController.leaveList);
 router.post(
     '/add-leave',
     fileUpload(),

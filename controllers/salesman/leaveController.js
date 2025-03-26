@@ -24,28 +24,29 @@ exports.addLeave = async (req, res, next) => {
 
 exports.editLeave = async (req, res, next) => {
     try {
-        const leave = await Leave.findOne({
-            _id: req.params.id,
-            status: 'Pending',
-        });
-        if (!leave)
+        const updateData = {};
+
+        ['leaveType', 'fromDate', 'toDate', 'halfDay', 'notes'].forEach(
+            field => {
+                if (req.body[field]) updateData[field] = req.body[field];
+            }
+        );
+
+        const data = await Leave.findOneAndUpdate(
+            { _id: req.params.id, status: 'Pending' },
+            { $set: updateData },
+            { new: true, runValidators: true }
+        );
+        if (!data)
             return res.status(404).json({
                 success: false,
                 message: 'Pending leave request not found or cannot be edited',
             });
 
-        leave.leaveType = req.body.leaveType;
-        leave.fromDate = req.body.fromDate;
-        leave.toDate = req.body.toDate;
-        leave.halfDay = req.body.halfDay;
-        leave.notes = req.body.notes;
-
-        await leave.save();
-
         res.json({
             success: true,
             message: 'Leave edited successfully',
-            leave,
+            leave: data,
         });
     } catch (error) {
         next(error);

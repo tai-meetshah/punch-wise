@@ -26,31 +26,33 @@ exports.addExpenses = async (req, res, next) => {
 
 exports.editExpenses = async (req, res, next) => {
     try {
-        const expenses = await Expenses.findOne({
-            _id: req.params.id,
-            status: 'Pending',
+        const updateData = {};
+
+        ['date', 'expensesFor', 'amount', 'description'].forEach(field => {
+            if (req.body[field]) updateData[field] = req.body[field];
         });
-        if (!expenses)
+
+        if (req.files && req.files.receipt)
+            updateData.receipt = `/uploads/${req.files.receipt[0].filename}`;
+
+        const updatedExpense = await Expenses.findOneAndUpdate(
+            { _id: req.params.id, status: 'Pending' },
+            { $set: updateData },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedExpense) {
             return res.status(404).json({
                 success: false,
                 message:
                     'Pending expenses request not found or cannot be edited',
             });
-
-        expenses.date = req.body.date;
-        expenses.expensesFor = req.body.expensesFor;
-        expenses.amount = req.body.amount;
-        expenses.description = req.body.description;
-        expenses.receipt = req.files.receipt
-            ? `/uploads/${req.files.receipt[0].filename}`
-            : '';
-
-        await expenses.save();
+        }
 
         res.json({
             success: true,
-            message: 'expenses edited successfully',
-            expenses,
+            message: 'Expenses edited successfully',
+            expenses: updatedExpense,
         });
     } catch (error) {
         next(error);

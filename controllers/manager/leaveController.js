@@ -63,7 +63,7 @@ exports.salesmanLeaveRequests = async (req, res, next) => {
 exports.addLeave = async (req, res, next) => {
     try {
         const leave = await Leave.create({
-            salesman: req.salesman.id,
+            manager: req.manager.id,
             leaveType: req.body.leaveType,
             fromDate: req.body.fromDate,
             toDate: req.body.toDate,
@@ -77,33 +77,36 @@ exports.addLeave = async (req, res, next) => {
             leave,
         });
     } catch (error) {
+        console.log('error: ', error);
         next(error);
     }
 };
 
 exports.editLeave = async (req, res, next) => {
     try {
-        const leave = await Leave.findOne({
-            _id: req.params.id,
-            status: 'Pending',
-        });
-        if (!leave)
+        const updateData = {};
+
+        ['leaveType', 'fromDate', 'toDate', 'halfDay', 'notes'].forEach(
+            field => {
+                if (req.body[field]) updateData[field] = req.body[field];
+            }
+        );
+
+        const data = await Leave.findOneAndUpdate(
+            { _id: req.params.id, status: 'Pending' },
+            { $set: updateData },
+            { new: true, runValidators: true }
+        );
+        if (!data)
             return res.status(404).json({
                 success: false,
                 message: 'Pending leave request not found or cannot be edited',
             });
 
-        leave.leaveType = req.body.leaveType;
-        leave.fromDate = req.body.fromDate;
-        leave.toDate = req.body.toDate;
-        leave.halfDay = req.body.halfDay;
-
-        await leave.save();
-
         res.json({
             success: true,
             message: 'Leave edited successfully',
-            leave,
+            leave: data,
         });
     } catch (error) {
         next(error);
@@ -128,6 +131,39 @@ exports.cancelLeave = async (req, res, next) => {
         res.json({
             success: true,
             message: 'Leave request cancelled successfully',
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.leaveList = async (req, res, next) => {
+    try {
+        const { status, dateFilter, startDate, endDate } = req.query;
+        let query = {};
+
+        if (status) query.status = status;
+
+        if (dateFilter) {
+            const dateRange = getDateRange(dateFilter);
+
+            query.fromDate = { $gte: dateRange.fromDate };
+            query.toDate = { $lte: dateRange.toDate };
+        }
+
+        // Handle custom date range
+        if (startDate && endDate) {
+            query.fromDate = { $gte: new Date(startDate) };
+            query.toDate = { $lte: new Date(endDate) };
+        }
+
+        const leaves = await Leave.find(query)
+            .populate('company')
+            .select('-__v -manager');
+
+        res.json({
+            success: true,
+            leaves,
         });
     } catch (error) {
         next(error);
