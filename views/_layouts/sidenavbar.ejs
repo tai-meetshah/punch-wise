@@ -72,23 +72,23 @@
           </li>
         </ul>
 
-    </div>
+      </div>
     </li>
 
     <li class="navigation-header">
       <a class="navigation-header-text">Company</a>
       <i class="navigation-header-icon material-icons">more_horiz</i>
     </li>
-    <li class="bold <%= url.startsWith('/user') ? 'active' : '' %>">
-      <a class="waves-effect waves-cyan <%= url.startsWith('/user') ? 'active' : '' %>" href="/user">
+    <li class="bold <%= url.startsWith('/company') ? 'active' : '' %>">
+      <a class="waves-effect waves-cyan <%= url.startsWith('/company') ? 'active' : '' %>" href="/company">
         <i class="material-icons">person</i>
-        <span class="menu-title">User Management</span>
+        <span class="menu-title">Company Management</span>
       </a>
     </li>
-    <li class="bold <%= url.startsWith('/message-user') ? 'active' : '' %>">
-      <a class="waves-effect waves-cyan <%= url.startsWith('/message-user') ? 'active' : '' %>" href="/message-user">
+    <li class="bold <%= url.startsWith('/message-company') ? 'active' : '' %>">
+      <a class="waves-effect waves-cyan <%= url.startsWith('/message-company') ? 'active' : '' %>" href="/message-company">
         <i class="material-icons">contact_mail</i>
-        <span class="menu-title">User Messages</span>
+        <span class="menu-title">Company Messages</span>
       </a>
     </li>
 
@@ -99,30 +99,36 @@
     <li class="bold">
       <a class="waves-effect waves-cyan <%= url.startsWith('/claim') ? 'active' : '' %>" href="/claim">
         <i class="material-icons">description</i>
-        <span class="menu-title">Vendor Requests</span>
+        <span class="menu-title">Manager Requests</span>
       </a>
     </li>
-    <li class="bold <%= url.startsWith('/vendor') ? 'active' : '' %>">
-      <a class="waves-effect waves-cyan <%= url.startsWith('/vendor') ? 'active' : '' %>" href="/vendor">
+    <li class="bold <%= url.startsWith('/manager') ? 'active' : '' %>">
+      <a class="waves-effect waves-cyan <%= url.startsWith('/manager') ? 'active' : '' %>" href="/manager">
         <i class="material-icons">person_outline</i>
-        <span class="menu-title">Vendor Management</span>
+        <span class="menu-title">Manager Management</span>
       </a>
     </li>
-    <li class="bold <%= url.startsWith('/message-vendor') ? 'active' : '' %>">
-      <a class="waves-effect waves-cyan <%= url.startsWith('/message-vendor') ? 'active' : '' %>" href="/message-vendor">
+    <li class="bold <%= url.startsWith('/message-manager') ? 'active' : '' %>">
+      <a class="waves-effect waves-cyan <%= url.startsWith('/message-manager') ? 'active' : '' %>" href="/message-manager">
         <i class="material-icons">contact_mail</i>
-        <span class="menu-title">Vendor Messages</span>
+        <span class="menu-title">Manager Messages</span>
       </a>
     </li>
 
     <li class="navigation-header">
-      <a class="navigation-header-text">Employee</a>
+      <a class="navigation-header-text">Salesman</a>
       <i class="navigation-header-icon material-icons">more_horiz</i>
     </li>
-    <li class="bold <%= url.startsWith('/offer') ? 'active' : '' %>">
-      <a class="waves-effect waves-cyan <%= url.startsWith('/offer') ? 'active' : '' %>" href="/offer">
-        <i class="material-icons">local_activity</i>
-        <span class="menu-title">Offer Management</span>
+    <li class="bold <%= url.startsWith('/salesman') ? 'active' : '' %>">
+      <a class="waves-effect waves-cyan <%= url.startsWith('/salesman') ? 'active' : '' %>" href="/salesman">
+        <i class="material-icons">person</i>
+        <span class="menu-title">Salesman Management</span>
+      </a>
+    </li>
+    <li class="bold <%= url.startsWith('/message-salesman') ? 'active' : '' %>">
+      <a class="waves-effect waves-cyan <%= url.startsWith('/message-salesman') ? 'active' : '' %>" href="/message-salesman">
+        <i class="material-icons">contact_mail</i>
+        <span class="menu-title">Salesman Messages</span>
       </a>
     </li>
   </ul>

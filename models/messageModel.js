@@ -8,15 +8,19 @@ const messageSchema = new mongoose.Schema({
         required: [true, validation.error.name],
         trim: true,
     },
+    phone: {
+        type: String,
+        required: [true, validation.error.phone],
+    },
     email: {
         type: String,
         required: [true, validation.error.email],
         lowercase: true,
         validate: [validator.isEmail, validation.error.emailInvalid],
     },
-    comments: {
+    message: {
         type: String,
-        required: [true, validation.error.comments],
+        required: [true, validation.error.message],
         trim: true,
     },
     date: {

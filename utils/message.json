@@ -21,6 +21,7 @@
     "country": "Please provide country.",
     "postalCode": "Please provide postal code.",
     "comments": "Please enter comments.",
+    "message": "Please enter message.",
 
     "credentials": "Invalid credentials.",
     "phonePassword": "Provide phone and PIN!",

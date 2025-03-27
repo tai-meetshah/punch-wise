@@ -6,7 +6,7 @@ const Admin = require('../../models/adminModel');
 const OTP = require('../../models/adminOtpModel');
 const Salesman = require('../../models/salesmanModel');
 const Manager = require('../../models/managerModel');
-// const Company = require('../../models/');
+const Company = require('../../models/companyModel');
 
 exports.checkAdmin = async (req, res, next) => {
     try {
