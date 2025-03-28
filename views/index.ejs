@@ -3,48 +3,98 @@
 <!-- BEGIN: Head-->
 
 <head>
-    <%- include('_layouts/head') %>
-    <title>Dashboard | <%= title %></title>
-    <link rel="stylesheet" type="text/css" href="/app-assets/css/pages/dashboard.css">
-    <style>
-        .gradient-45deg-purple-light-purple {
-        background: linear-gradient(45deg, #9c27b0, #d3a6db);
-        }
-    </style>
+  <%- include('_layouts/head') %>
+  <title>Dashboard | <%= title %></title>
+  <link rel="stylesheet" type="text/css" href="/app-assets/css/pages/dashboard.css">
+  <style>
+    .gradient-45deg-purple-light-purple {
+      background: linear-gradient(45deg, #9c27b0, #d3a6db);
+    }
+  </style>
 </head>
 <!-- END: Head-->
 
 <body class="vertical-layout page-header-light vertical-menu-collapsible vertical-dark-menu preload-transitions 2-columns" data-open="click" data-menu="vertical-dark-menu" data-col="2-columns">
 
-    <%- include('_layouts/sidenavbar') %>
+  <%- include('_layouts/sidenavbar') %>
 
-    <!-- BEGIN: Page Main-->
-    <div id="main">
-        <div class="row">
-            <div class="col s12">
-                <div class="container">
-                    <div class="section">
-                        <!--card stats start-->
-                        <div id="card-stats" class="pt-0">
-                            <div class="row">
-                                <%- messages('messages', locals) %>
-                            </div>
-                            <div class="row">
-
-                          
-
-                            </div>
-                            <!--card stats end-->
-
+  <!-- BEGIN: Page Main-->
+  <div id="main">
+    <div class="row">
+      <div class="col s12">
+        <div class="container">
+          <div class="section">
+            <!--card stats start-->
+            <div id="card-stats" class="pt-0">
+              <div class="row">
+                <%- messages('messages', locals) %>
+              </div>
+              <div class="row">
+                <div class="col s12 m6 l6 xl3">
+                  <a href="/salesman">
+                    <div class="card gradient-45deg-light-blue-cyan gradient-shadow min-height-100 white-text animate fadeLeft">
+                      <div class="padding-4">
+                        <div class="row">
+                          <div class="col s7 m7">
+                            <i class="material-icons background-round mt-5">person</i>
+                            <p>Salesman</p>
+                          </div>
+                          <div class="col s5 m5 right-align">
+                            <h5 class="mb-0 white-text"><%= salesman %></h5>
+                          </div>
                         </div>
-                        <!--end container-->
+                      </div>
                     </div>
+                  </a>
                 </div>
+                <div class="col s12 m6 l6 xl3">
+                  <a href="/manager">
+                    <div class="card gradient-45deg-red-pink gradient-shadow min-height-100 white-text animate fadeLeft">
+                      <div class="padding-4">
+                        <div class="row">
+                          <div class="col s7 m7">
+                            <i class="material-icons background-round mt-5">person</i>
+                            <p>Manager</p>
+                          </div>
+                          <div class="col s5 m5 right-align">
+                            <h5 class="mb-0 white-text"><%= manager %></h5>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </a>
+                </div>
+                <div class="col s12 m6 l6 xl3">
+                  <a href="/company">
+                    <div class="card gradient-45deg-amber-amber gradient-shadow min-height-100 white-text animate fadeLeft">
+                      <div class="padding-4">
+                        <div class="row">
+                          <div class="col s7 m7">
+                            <i class="material-icons background-round mt-5">person</i>
+                            <p>Company</p>
+                          </div>
+                          <div class="col s5 m5 right-align">
+                            <h5 class="mb-0 white-text"><%= company %></h5>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </a>
+                </div>
+
+
+              </div>
+              <!--card stats end-->
+
             </div>
+            <!--end container-->
+          </div>
         </div>
+      </div>
     </div>
-    <!-- END: Page Main-->
-    <%- include('_layouts/commonJs') %>
+  </div>
+  <!-- END: Page Main-->
+  <%- include('_layouts/commonJs') %>
 </body>
 
 </html>

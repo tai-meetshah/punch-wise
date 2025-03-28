@@ -39,11 +39,13 @@ exports.checkAdmin = async (req, res, next) => {
 };
 
 exports.getDashboard = async (req, res) => {
-    const [salesman] = await Promise.all([
+    const [salesman, manager, company] = await Promise.all([
         Salesman.countDocuments({ isDeleted: false }),
+        Manager.countDocuments({ isDeleted: false }),
+        Company.countDocuments({ isDeleted: false }),
     ]);
 
-    res.render('index', { salesman });
+    res.render('index', { salesman, manager, company });
 };
 
 exports.getLogin = async (req, res) => {

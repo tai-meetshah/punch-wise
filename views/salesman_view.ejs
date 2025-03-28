@@ -4,7 +4,7 @@
 
 <head>
   <%- include('_layouts/head') %>
-  <title>User View | <%= title %></title>
+  <title>salesman View | <%= title %></title>
   <link rel="stylesheet" type="text/css" href="/app-assets/css/pages/page-users.css">
   <link rel="stylesheet" type="text/css" href="/app-assets/vendors/data-tables/css/jquery.dataTables.min.css">
   <link rel="stylesheet" type="text/css" href="/app-assets/vendors/data-tables/extensions/responsive/css/responsive.dataTables.min.css">
@@ -25,13 +25,13 @@
         <div class="container">
           <div class="row">
             <div class="col s12 m6 l6">
-              <h5 class="breadcrumbs-title mt-0 mb-0"><a class="mr-2" href="/user"><i class="material-icons">arrow_back</i></a><span>User View</span></h5>
+              <h5 class="breadcrumbs-title mt-0 mb-0"><a class="mr-2" href="/salesman"><i class="material-icons">arrow_back</i></a><span>Salesman View</span></h5>
             </div>
             <div class="col s12 m6 l6 right-align-md">
               <ol class="breadcrumbs mb-0">
                 <li class="breadcrumb-item"><a href="/">Home</a></li>
-                <li class="breadcrumb-item"><a href="/user">User</a></li>
-                <li class="breadcrumb-item active">User View</li>
+                <li class="breadcrumb-item"><a href="/salesman">Salesman</a></li>
+                <li class="breadcrumb-item active">Salesman View</li>
               </ol>
             </div>
           </div>
@@ -72,23 +72,38 @@
                           <td><%= user.name %></td>
                         </tr>
                         <tr>
+                          <th style="width: 200px;">Company:</th>
+                          <td><%= user.company %></td>
+                        </tr>
+                        <tr>
+                          <th style="width: 200px;">Phone:</th>
+                          <td><%= user.phone %></td>
+                        </tr>
+                        <tr>
                           <th>E-mail:</th>
                           <td><%= user.email %></td>
                         </tr>
                         <tr>
-                          <th>Event Name:</th>
-                          <td><% if (user.event.length > 0) { %>
-                            <%= user.event.map((event)=> event.name).join(', ') %>
-                            <% } %>
-                          </td>
+                          <th style="width: 200px;">DOB:</th>
+                          <td><%= user.dob %></td>
                         </tr>
                         <tr>
-                          <th>Event Code:</th>
-                          <td><% if (user.event.length > 0) { %>
-                            <%= user.event.map((event)=> event.eventCode).join(', ') %>
-                            <% } %>
-                          </td>
+                          <th style="width: 200px;">Gender:</th>
+                          <td><%= user.gender %></td>
                         </tr>
+                        <tr>
+                          <th style="width: 200px;">Address:</th>
+                          <td><%= user.address %></td>
+                        </tr>
+                        <tr>
+                          <th style="width: 200px;">City:</th>
+                          <td><%= user.city %></td>
+                        </tr>
+                        <tr>
+                          <th style="width: 200px;">State:</th>
+                          <td><%= user.state %></td>
+                        </tr>
+
                         <tr>
                           <th>Date created:</th>
                           <td><%= user.date.toLocaleDateString(dateLocale) %></td>

@@ -71,7 +71,7 @@ const taskSchema = new mongoose.Schema({
 
     status: {
         type: String,
-        enum: ['Pending', 'Block', 'Unblock', 'Start', 'Completed'], // Start = Todo
+        enum: ['Pending', 'Block', 'Start', 'Completed'], // Start = Todo
         default: 'Pending',
     },
     feedback: { type: Strings },
