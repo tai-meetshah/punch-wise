@@ -45,7 +45,26 @@ exports.getDashboard = async (req, res) => {
         Company.countDocuments({ isDeleted: false }),
     ]);
 
-    res.render('index', { salesman, manager, company });
+    let newSalesman = 0;
+    for (let i = 0; i < salesman.length; i++)
+        if (isToday(salesman[i].date)) newSalesman++;
+
+    let newManager = 0;
+    for (let i = 0; i < manager.length; i++)
+        if (isToday(manager[i].date)) newManager++;
+
+    let newCompany = 0;
+    for (let i = 0; i < company.length; i++)
+        if (isToday(company[i].date)) newCompany++;
+
+    res.render('index', {
+        salesman,
+        manager,
+        company,
+        newManager,
+        newCompany,
+        newSalesman,
+    });
 };
 
 exports.getLogin = async (req, res) => {
@@ -226,4 +245,13 @@ exports.postChangePass = async (req, res) => {
         }
         return res.redirect(req.originalUrl);
     }
+};
+
+const isToday = someDate => {
+    const today = new Date();
+    return (
+        someDate.getDate() == today.getDate() &&
+        someDate.getMonth() == today.getMonth() &&
+        someDate.getFullYear() == today.getFullYear()
+    );
 };
