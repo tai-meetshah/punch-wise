@@ -105,14 +105,20 @@ const getDateRange = filter => {
 
 exports.leaveList = async (req, res, next) => {
     try {
-        const { status, dateFilter, startDate, endDate } = req.query;
+        const {
+            status,
+            dateFilter,
+            startDate,
+            endDate,
+            page = 1,
+            limit = 10,
+        } = req.query;
         let query = {};
 
         if (status) query.status = status;
 
         if (dateFilter) {
             const dateRange = getDateRange(dateFilter);
-
             query.fromDate = { $gte: dateRange.fromDate };
             query.toDate = { $lte: dateRange.toDate };
         }
@@ -123,13 +129,25 @@ exports.leaveList = async (req, res, next) => {
             query.toDate = { $lte: new Date(endDate) };
         }
 
+        const pageNumber = parseInt(page, 10);
+        const limitNumber = parseInt(limit, 10);
+        const skip = (pageNumber - 1) * limitNumber;
+
+        const totalLeaves = await Leave.countDocuments(query);
+
         const leaves = await Leave.find(query)
-            .populate('manager')
-            .populate('company')
-            .select('-__v -salesman');
+            .populate('manager', 'name')
+            .populate('company', 'name')
+            .select('-__v -salesman')
+            .skip(skip)
+            .limit(limitNumber);
 
         res.json({
             success: true,
+            page: pageNumber,
+            limit: limitNumber,
+            totalLeaves,
+            totalPages: Math.ceil(totalLeaves / limitNumber),
             leaves,
         });
     } catch (error) {

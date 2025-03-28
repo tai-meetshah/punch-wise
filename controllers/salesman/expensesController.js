@@ -111,7 +111,14 @@ const getDateRange = filter => {
 
 exports.expensesList = async (req, res, next) => {
     try {
-        const { status, dateFilter, startDate, endDate } = req.query;
+        const {
+            status,
+            dateFilter,
+            startDate,
+            endDate,
+            page = 1,
+            limit = 10,
+        } = req.query;
         let query = {};
 
         if (status) query.status = status;
@@ -125,13 +132,25 @@ exports.expensesList = async (req, res, next) => {
             query.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
         }
 
+        const pageNumber = parseInt(page, 10);
+        const limitNumber = parseInt(limit, 10);
+        const skip = (pageNumber - 1) * limitNumber;
+
+        const totalExpenses = await Expenses.countDocuments(query);
+
         const expenses = await Expenses.find(query)
-            .populate('manager')
-            .populate('company')
-            .select('-__v -salesman');
+            .populate('manager', 'name')
+            .populate('company', 'name')
+            .select('-__v -salesman')
+            .skip(skip)
+            .limit(limitNumber);
 
         res.json({
             success: true,
+            page: pageNumber,
+            limit: limitNumber,
+            totalExpenses,
+            totalPages: Math.ceil(totalExpenses / limitNumber),
             expenses,
         });
     } catch (error) {

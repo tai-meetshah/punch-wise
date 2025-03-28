@@ -74,7 +74,7 @@ exports.getDeleteMessages = async (req, res) => {
         res.redirect('/message-company');
     }
 };
-// 9714140400
+
 exports.blockUser = async (req, res) => {
     try {
         const user = await Company.findByIdAndUpdate(

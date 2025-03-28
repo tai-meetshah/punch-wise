@@ -14,7 +14,6 @@ exports.getAllUsers = async (req, res) => {
         res.redirect('/');
     }
 };
-// 8140118519 9824685920
 
 exports.viewUser = async (req, res) => {
     try {
@@ -49,7 +48,6 @@ exports.getAllMessages = async (req, res) => {
 exports.viewMessages = async (req, res) => {
     try {
         const message = await ManagerMessage.findById(req.params.id);
-        console.log('message: 9662974105', message);
         if (!message) {
             req.flash('red', 'Message not found!');
             return res.redirect('/message-manager');
