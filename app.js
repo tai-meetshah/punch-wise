@@ -79,6 +79,13 @@ app.use('/api/manager', require('./routes/manager/dashboardRoutes'));
 app.use('/api/manager', require('./routes/manager/leaveRoutes'));
 app.use('/api/manager', require('./routes/manager/expensesRoutes'));
 
+// 3) company ROUTES
+app.use('/api/company', require('./routes/company/authRoutes'));
+// app.use('/api/company', require('./routes/company/cmsRoutes'));
+// app.use('/api/company', require('./routes/company/dashboardRoutes'));
+// app.use('/api/company', require('./routes/company/leaveRoutes'));
+// app.use('/api/company', require('./routes/company/expensesRoutes'));
+
 // 404 api
 app.use('/api', (req, res, next) => {
     next(createError.NotFound(`Can't find ${req.originalUrl} on this server!`));
@@ -106,6 +113,9 @@ app.use(function (req, res, next) {
 
 app.use('/', require('./routes/admin/authRoutes'));
 app.use('/cms', require('./routes/admin/cmsRoutes'));
+app.use('/salesman', require('./routes/admin/salesmanRoutes'));
+app.use('/manager', require('./routes/admin/managerRoutes'));
+app.use('/company', require('./routes/admin/companyRoutes'));
 
 // 404 admin
 app.all('/*', (req, res) => {
