@@ -14,7 +14,7 @@ exports.addTask = async (req, res, next) => {
 
         return res.json({
             success: true,
-            message: 'Task request submited succefully',
+            message: 'Task added succefully',
             task: leave,
         });
     } catch (error) {
