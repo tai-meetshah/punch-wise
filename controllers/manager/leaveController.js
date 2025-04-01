@@ -188,3 +188,29 @@ exports.leaveList = async (req, res, next) => {
         next(error);
     }
 };
+
+const getDateRange = filter => {
+    const now = moment();
+
+    switch (filter) {
+        case 'today':
+            return {
+                fromDate: now.startOf('day').toDate(),
+                toDate: now.endOf('day').toDate(),
+            };
+        case 'thisMonth':
+            return {
+                fromDate: now.startOf('month').toDate(),
+                toDate: now.endOf('month').toDate(),
+            };
+        case 'past7Days':
+            return {
+                toDate: now.endOf('day').toDate(),
+                fromDate: now.subtract(7, 'days').toDate(),
+            };
+        case 'custom':
+            return {};
+        default:
+            return {};
+    }
+};

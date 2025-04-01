@@ -1,7 +1,7 @@
 const Page = require('../../models/pageModel');
 const Contact = require('../../models/contactModel');
 const { SalesmanFAQ } = require('../../models/faqsModel');
-const { SalesmanMessage } = require('../../models/messageModel');
+const { CompanyMessage } = require('../../models/messageModel');
 const msg = require('../../utils/message.json');
 
 exports.getTermsCondition = async (req, res, next) => {
@@ -54,7 +54,7 @@ exports.getContact = async (req, res, next) => {
 
 exports.postContact = async (req, res, next) => {
     try {
-        await SalesmanMessage.create(req.body);
+        await CompanyMessage.create(req.body);
         res.status(201).json({ success: true, message: msg.success.msg });
     } catch (error) {
         next(error);

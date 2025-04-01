@@ -47,7 +47,7 @@ exports.addTask = async (req, res, next) => {
 
         return res.json({
             success: true,
-            message: 'Task request submited succefully',
+            message: 'Task added succefully',
             task: leave,
         });
     } catch (error) {
@@ -107,7 +107,7 @@ exports.unblockTask = async (req, res, next) => {
 
         res.json({
             success: true,
-            message: 'Task blocked successfully',
+            message: 'Task unblocked successfully',
         });
     } catch (error) {
         next(error);

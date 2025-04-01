@@ -234,7 +234,7 @@ exports.createBusiness = async (req, res, next) => {
         res.json({
             success: true,
             step: 2,
-            message: ' Business created sucessfully.',
+            message: 'Business created sucessfully.',
             business,
         });
     } catch (error) {
@@ -279,7 +279,7 @@ exports.addBusinessImages = async (req, res, next) => {
         res.json({
             success: true,
             step: 3,
-            message: ' Business images added sucessfully.',
+            message: 'Business images added sucessfully.',
             business,
         });
     } catch (error) {
