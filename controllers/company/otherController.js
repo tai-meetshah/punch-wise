@@ -20,7 +20,7 @@ exports.addHoliday = async (req, res, next) => {
 
 exports.getHoliday = async (req, res, next) => {
     try {
-        const data = Holiday.find({ company: req.body.company });
+        const data = await Holiday.find({ company: req.body.company });
 
         res.json({ success: true, data });
     } catch (error) {

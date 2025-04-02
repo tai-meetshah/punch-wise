@@ -1,24 +1,23 @@
 const router = require('express').Router();
 const fileUpload = require('express-fileupload');
 
-const { checkSalesman } = require('../../controllers/salesman/authController');
-const { upload } = require('../../controllers/uploadController');
-const dashboardController = require('../../controllers/salesman/o');
+const { checkCompany } = require('../../controllers/company/authController');
+const otherController = require('../../controllers/company/otherController');
 
-router.get('/get-profile', checkSalesman, dashboardController.getProfile);
+router.get('/holiday-list', checkCompany, otherController.getHoliday);
 
 router.post(
-    '/edit-profile',
-    checkSalesman,
-    upload.single('photo'),
-    dashboardController.editProfile
+    '/add-holiday',
+    checkCompany,
+    fileUpload(),
+    otherController.addHoliday
 );
 
 router.post(
-    '/change-password',
+    '/edit-holiday',
     fileUpload(),
-    checkSalesman,
-    dashboardController.changePassword
+    checkCompany,
+    otherController.editHoliday
 );
 
 module.exports = router;

@@ -17,12 +17,27 @@ router.post('/create-pin', fileUpload(), authController.createPin);
 
 router.route('/create-profile').post(
     upload.fields([
-        { name: 'idProof', maxCount: 1 },
+        // { name: 'idProof', maxCount: 1 },
         { name: 'photo', maxCount: 1 },
-        { name: 'certificate', maxCount: 1 },
+        // { name: 'certificate', maxCount: 1 },
     ]),
     checkCompany,
     authController.createProfile
+);
+
+router
+    .route('/create-business')
+    .post(fileUpload(), checkCompany, authController.createBusiness);
+
+router.route('/add-business-images').post(
+    upload.fields([
+        { name: 'businessLogo', maxCount: 1 },
+        { name: 'businessSupportDoc', maxCount: 1 },
+        { name: 'businessLicense', maxCount: 1 },
+        { name: 'businessTin', maxCount: 1 },
+    ]),
+    checkCompany,
+    authController.addBusinessImages
 );
 
 router.post('/resend-otp', fileUpload(), authController.resendOTP);

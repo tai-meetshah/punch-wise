@@ -176,12 +176,6 @@ exports.createProfile = async (req, res, next) => {
         company.photo = req.files.photo
             ? `/uploads/${req.files.photo[0].filename}`
             : '';
-        company.idProof = req.files.idProof
-            ? `/uploads/${req.files.idProof[0].filename}`
-            : '';
-        company.certificate = req.files.certificate
-            ? `/uploads/${req.files.certificate[0].filename}`
-            : '';
 
         await company.save();
 
@@ -193,10 +187,12 @@ exports.createProfile = async (req, res, next) => {
 
         res.json({
             success: true,
-            message: 'company profile crated sucessfully.',
+            message: 'company profile created sucessfully.',
+            step: 1,
             company,
         });
     } catch (error) {
+        console.log('error: ', error);
         next(error);
     }
 };
@@ -208,14 +204,18 @@ exports.createBusiness = async (req, res, next) => {
 
         const business = await Business.create({
             company: company.id,
-            password: req.body.password,
             businessName: req.body.businessName,
             businessRegistrationType: req.body.businessRegistrationType,
             businessCategory: req.body.businessCategory,
 
             yearEstablish: req.body.yearEstablish,
-            workingHours: req.body.workingHours,
-            workingDays: parseOpeningHours(req.body.workingDays),
+            workingHours: {
+                from: req.body['workingHours[from]'],
+                to: req.body['workingHours[to]'],
+            },
+            workingDays: req.body.workingDays?.split(',').map(x => x.trim()),
+            // .split(",") → Converts a string into an array (✅ Useful for your case)
+            // .join(",") → Converts an array into a string (❌ Not what you need here)
 
             businessWebsite: req.body.businessWebsite,
             businessPhone: req.body.businessPhone,
@@ -248,16 +248,16 @@ exports.addBusinessImages = async (req, res, next) => {
         const company = req.company;
         const businessID = await Business.findOne({ company }).select('id');
 
-        const businessLogo = req.file
+        const businessLogo = req.files
             ? `/uploads/${req.files.businessLogo[0].filename}`
             : undefined;
-        const businessSupportDoc = req.file
+        const businessSupportDoc = req.files
             ? `/uploads/${req.files.businessSupportDoc[0].filename}`
             : undefined;
-        const businessLicense = req.file
+        const businessLicense = req.files
             ? `/uploads/${req.files.businessLicense[0].filename}`
             : undefined;
-        const businessTin = req.file
+        const businessTin = req.files
             ? `/uploads/${req.files.businessTin[0].filename}`
             : undefined;
 

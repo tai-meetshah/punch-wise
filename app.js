@@ -71,6 +71,7 @@ app.use('/api/salesman', require('./routes/salesman/cmsRoutes'));
 app.use('/api/salesman', require('./routes/salesman/dashboardRoutes'));
 app.use('/api/salesman', require('./routes/salesman/leaveRoutes'));
 app.use('/api/salesman', require('./routes/salesman/expensesRoutes'));
+app.use('/api/salesman', require('./routes/salesman/otherRoutes'));
 
 // 3) manager ROUTES
 app.use('/api/manager', require('./routes/manager/authRoutes'));
@@ -78,6 +79,8 @@ app.use('/api/manager', require('./routes/manager/cmsRoutes'));
 app.use('/api/manager', require('./routes/manager/dashboardRoutes'));
 app.use('/api/manager', require('./routes/manager/leaveRoutes'));
 app.use('/api/manager', require('./routes/manager/expensesRoutes'));
+app.use('/api/manager', require('./routes/manager/otherRoutes'));
+app.use('/api/manager', require('./routes/manager/taskRoutes'));
 
 // 3) company ROUTES
 app.use('/api/company', require('./routes/company/authRoutes'));
@@ -85,6 +88,7 @@ app.use('/api/company', require('./routes/company/authRoutes'));
 // app.use('/api/company', require('./routes/company/dashboardRoutes'));
 // app.use('/api/company', require('./routes/company/leaveRoutes'));
 // app.use('/api/company', require('./routes/company/expensesRoutes'));
+app.use('/api/company', require('./routes/company/otherRoutes'));
 
 // 404 api
 app.use('/api', (req, res, next) => {

@@ -1,9 +1,12 @@
 const Holiday = require('../../models/holidayModel');
 const Company = require('../../models/companyModel');
+const Client = require('../../models/clientModel');
+const Salesman = require('../../models/salesmanModel');
+const Business = require('../../models/businessModel');
 
 exports.getHoliday = async (req, res, next) => {
     try {
-        const data = Holiday.find({ company: req.body.company });
+        const data = await Holiday.find({ company: req.manager?.company });
 
         res.json({ success: true, data });
     } catch (error) {
@@ -13,9 +16,21 @@ exports.getHoliday = async (req, res, next) => {
 
 exports.getCompany = async (req, res, next) => {
     try {
-        const data = Company.find({ id: req.body.company });
+        const companyId = req.manager?.company;
+        const [company, business] = await Promise.all([
+            Company.findOne({ _id: companyId }).lean(),
+            Business.findOne({ company: companyId }).lean(),
+        ]);
 
-        res.json({ success: true, data });
+        company.salesman = undefined;
+        company.role = undefined;
+        company.manager = undefined;
+        company.client = undefined;
+        company.fcmToken = undefined;
+        company.step = undefined;
+        company.gender = undefined;
+
+        res.json({ success: true, data: { ...company, ...business } });
     } catch (error) {
         next(error);
     }

@@ -1,11 +1,14 @@
 const Client = require('../../models/clientModel');
-const Task = require('../../models/managerTaskModel');
+const Task = require('../../models/salesmanTaskModel');
 const Salesman = require('../../models/salesmanModel');
 const moment = require('moment');
 
 exports.getSalesmanList = async (req, res, next) => {
     try {
-        let data = await Salesman.find({ isDeleted: false })
+        let data = await Salesman.find({
+            isDeleted: false,
+            company: req.manager?.company,
+        })
             .sort('-name')
             .select('name phone');
 
@@ -17,7 +20,10 @@ exports.getSalesmanList = async (req, res, next) => {
 
 exports.getClientList = async (req, res, next) => {
     try {
-        let data = await Client.find({ isDeleted: false })
+        let data = await Client.find({
+            isDeleted: false,
+            manager: req.manager?.id,
+        })
             .sort('-name')
             .select('name phone');
 
@@ -30,9 +36,9 @@ exports.getClientList = async (req, res, next) => {
 exports.addTask = async (req, res, next) => {
     try {
         const leave = await Task.create({
-            salesman: req.salesman.id,
+            salesman: req.body.salesman,
             manager: req.manager.id,
-            client: req.client.id,
+            client: req.body.client,
 
             startDate: req.body.startDate,
             task: req.body.task,
@@ -51,6 +57,7 @@ exports.addTask = async (req, res, next) => {
             task: leave,
         });
     } catch (error) {
+        console.log('error: ', error);
         next(error);
     }
 };
@@ -188,9 +195,9 @@ exports.taskList = async (req, res, next) => {
         }
 
         const tasks = await Task.find(query)
-            .populate('manager')
+            .populate('salesman')
             .populate('company')
-            .select('-__v -salesman');
+            .select('-__v -manager');
 
         res.json({
             success: true,

@@ -6,5 +6,6 @@ const { upload } = require('../../controllers/uploadController');
 const otherController = require('../../controllers/manager/otherController');
 
 router.get('/get-holiday', checkManager, otherController.getHoliday);
+router.get('/get-company', checkManager, otherController.getCompany);
 
 module.exports = router;

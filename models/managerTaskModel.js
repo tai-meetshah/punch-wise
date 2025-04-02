@@ -30,7 +30,7 @@ const taskSchema = new mongoose.Schema({
     attachment: { type: String, required: true },
 
     geofenceName: { type: String },
-    shapeType: { type: String, enum: ['rectangle', 'circle'], required: true },
+    shapeType: { type: String, enum: ['rectangle', 'circle'] },
     // Circle Geofence (Uses GeoJSON)
     center: {
         type: { type: String, enum: ['Point'], default: 'Point' },
@@ -61,12 +61,12 @@ const taskSchema = new mongoose.Schema({
         enum: ['Pending', 'Block', 'Start', 'Completed'], // Start = Todo
         default: 'Pending',
     },
-    feedback: { type: Strings },
+    feedback: { type: String },
 
-    contactPersonName: { type: Strings },
-    contactPersonNumber: { type: Strings },
-    upload: { type: Strings },
-    description: { type: Strings },
+    contactPersonName: { type: String },
+    contactPersonNumber: { type: String },
+    upload: { type: String },
+    description: { type: String },
 
     // ** Shift Type Change Request**
     shiftChangeRequest: {
@@ -74,7 +74,7 @@ const taskSchema = new mongoose.Schema({
         status: {
             type: String,
             enum: ['Pending', 'Approved', 'Rejected'],
-            default: 'Pending',
+            // default: 'Pending',
         },
         requestedAt: { type: Date },
         reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },

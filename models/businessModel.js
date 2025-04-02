@@ -2,6 +2,11 @@ const mongoose = require('mongoose');
 const createError = require('http-errors');
 const validate = require('../utils/message.json');
 
+const workingHoursSchema = new mongoose.Schema({
+    from: { type: String, required: true }, // e.g., "09:00"
+    to: { type: String, required: true }, // e.g., "18:00"
+});
+
 const businessSchema = new mongoose.Schema({
     company: {
         type: mongoose.Schema.Types.ObjectId,
@@ -13,16 +18,22 @@ const businessSchema = new mongoose.Schema({
     businessCategory: String,
 
     yearEstablish: String,
-    workingHours: String,
-    workingDays: {
-        sunday: { type: String, default: 'Closed' },
-        monday: { type: String, default: 'Closed' },
-        tuesday: { type: String, default: 'Closed' },
-        wednesday: { type: String, default: 'Closed' },
-        thursday: { type: String, default: 'Closed' },
-        friday: { type: String, default: 'Closed' },
-        saturday: { type: String, default: 'Closed' },
-    },
+    workingDays: [
+        {
+            type: String,
+            enum: [
+                'Monday',
+                'Tuesday',
+                'Wednesday',
+                'Thursday',
+                'Friday',
+                'Saturday',
+                'Sunday',
+            ],
+            required: true,
+        },
+    ],
+    workingHours: workingHoursSchema,
 
     businessWebsite: String,
     businessPhone: String,

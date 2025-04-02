@@ -4,7 +4,8 @@ const { CompanyMessage } = require('../../models/messageModel');
 exports.getAllUsers = async (req, res) => {
     try {
         const users = await Company.find({ isDeleted: false })
-            .populate('company', 'name')
+            .populate('salesman', 'name')
+            .populate('manager', 'name')
             .select('+blocked')
             .sort('-_id');
 
@@ -17,10 +18,9 @@ exports.getAllUsers = async (req, res) => {
 
 exports.viewUser = async (req, res) => {
     try {
-        const user = await Company.findById(req.params.id).populate(
-            'company',
-            'name'
-        );
+        const user = await Company.findById(req.params.id)
+            .populate('salesman', 'name')
+            .populate('manager', 'name');
         if (!user) {
             req.flash('red', 'Company not found!');
             return res.redirect('/company');
