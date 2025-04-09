@@ -38,6 +38,12 @@ app.use(
 app.use(flash());
 app.use((req, res, next) => {
     res.locals.messages = expressMessages(req, res);
+    res.locals.dateOptions = {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+    };
+    res.locals.dateLocale = 'en-US';
     next();
 });
 

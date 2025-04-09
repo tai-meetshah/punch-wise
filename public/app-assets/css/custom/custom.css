@@ -31,6 +31,14 @@ WE WILL RELEASE FUTURE UPDATES SO IN ORDER TO NOT OVERWRITE YOUR STYLES IT'S BET
     max-height: 95px;
 }
 
+.theme-text{
+    color: #158944 !important;
+}
+.theme-warn-text{
+    color: #E82729 !important;
+}
+
+
 @media only screen and (max-width: 600px) {
     .btn-breadcrumbs {
         margin-top: 1rem;
@@ -96,38 +104,33 @@ label {
     padding: 10px !important;
 }
 
-::-webkit-input-placeholder {
-    /* WebKit, Blink, Edge */
-    color: #a6a6a6;
-}
-:-moz-placeholder {
-    /* Mozilla Firefox 4 to 18 */
-    color: #a6a6a6;
-    opacity: 1;
-}
-::-moz-placeholder {
-    /* Mozilla Firefox 19+ */
-    color: #a6a6a6;
-    opacity: 1;
-}
-:-ms-input-placeholder {
-    /* Internet Explorer 10-11 */
-    color: #a6a6a6;
-}
-::-ms-input-placeholder {
-    /* Microsoft Edge */
-    color: #a6a6a6;
+#ul-horizontal-nav li i{
+    font-size: 24px !important;
 }
 
-::placeholder {
-    /* Most modern browsers support this now. */
-    color: #a6a6a6;
+
+
+.error-message{
+    color: red;
 }
 
-.alert-auto-close {
-    transition: opacity 0.5s ease-in-out, display 0.5s ease-in-out;
+.btn-add:hover {
+    background-color: #2C2C2C;
+    color: #fff;
 }
 
-#profile-dropdown {
-    width: 230px !important;
+.btn-add{
+    background-color: #2C2C2C;
+}
+
+.btn-edit:hover {
+    color: #fff;
+}
+
+.btn-delete:hover {
+    background-color: #c91111;
+    color: #fff;
+}
+.btn-delete{
+    background-color: #ec1717;
 }

@@ -6,11 +6,6 @@
   <%- include('_layouts/head') %>
   <title>Dashboard | <%= title %></title>
   <link rel="stylesheet" type="text/css" href="/app-assets/css/pages/dashboard.css">
-  <style>
-    .gradient-45deg-purple-light-purple {
-      background: linear-gradient(45deg, #9c27b0, #d3a6db);
-    }
-  </style>
 </head>
 <!-- END: Head-->
 
@@ -19,88 +14,88 @@
   <%- include('_layouts/sidenavbar') %>
 
   <!-- BEGIN: Page Main-->
-  <div id="main">
-    <div class="row">
+  <div id="main ">
+    <div class="row dashboard">
       <div class="col s12">
         <div class="container">
           <div class="section">
             <!--card stats start-->
             <div id="card-stats" class="pt-0">
               <div class="row">
-                <%- messages('messages', locals) %>
               </div>
-              <div class="row">
-                <div class="col s12 m6 l6 xl3">
-                  <a href="/salesman">
-                    <div class="card gradient-45deg-light-blue-cyan gradient-shadow min-height-100 white-text animate fadeLeft">
-                      <div class="padding-4">
-                        <div class="row">
-                          <div class="col s7 m7">
-                            <i class="material-icons background-round mt-5">person</i>
-                            <p>Salesman</p>
-                          </div>
-                          <div class="col s5 m5 right-align">
-                            <h5 class="mb-0 white-text"><%= newSalesman %></h5>
-                            <p class="no-margin">Today</p>
-                            <p><%= salesman %></p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </a>
-                </div>
-                <div class="col s12 m6 l6 xl3">
-                  <a href="/manager">
-                    <div class="card gradient-45deg-red-pink gradient-shadow min-height-100 white-text animate fadeLeft">
-                      <div class="padding-4">
-                        <div class="row">
-                          <div class="col s7 m7">
-                            <i class="material-icons background-round mt-5">person</i>
-                            <p>Manager</p>
-                          </div>
-                          <div class="col s5 m5 right-align">
-                            <h5 class="mb-0 white-text"><%= newManager %></h5>
-                            <p class="no-margin">Today</p>
-                            <p><%= manager %></p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </a>
-                </div>
-                <div class="col s12 m6 l6 xl3">
-                  <a href="/company">
-                    <div class="card gradient-45deg-amber-amber gradient-shadow min-height-100 white-text animate fadeLeft">
-                      <div class="padding-4">
-                        <div class="row">
-                          <div class="col s7 m7">
-                            <i class="material-icons background-round mt-5">person</i>
-                            <p>Company</p>
-                          </div>
-                          <div class="col s5 m5 right-align">
-                            <h5 class="mb-0 white-text"><%= newCompany %></h5>
-                            <p class="no-margin">Today</p>
-                            <p><%= company %></p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </a>
+              <%- include('messages', { messages: messages }) %>
+              <div class="row mt-2">
+
+                <div class="col m3 s12" style="padding: 10px;">
+                  <div style="background-color: #1A9CFF;border-radius: 20px;padding: 10px 10px 20px 30px;">
+                    <a href="/manager">
+                      <h4 style="font-size: 40px;color: #FFFFFF;font-weight: 900;" class="counter" data-target="<%= manager %>">
+                      </h4>
+                      <span style="font-size: 22px;color: #FFFFFF">Total Managers</span>
+                    </a>
+                  </div>
                 </div>
 
+                <div class="col m3 s12" style="padding: 10px;">
+                  <div style="background-color: #5139DB;border-radius: 20px;padding: 10px 10px 20px 30px;">
+                    <a href="/salesman">
+                      <h4 style="font-size: 40px;color: #FFFFFF;font-weight: 900;" class="counter" data-target="<%= salesman %>">
+                      </h4>
+                      <span style="font-size: 22px;color: #FFFFFF">Total Salesmans</span>
+                    </a>
+                  </div>
+                </div>
+
+                 <div class="col m3 s12" style="padding: 10px;">
+                  <div style="background-color: #00ca1b;border-radius: 20px;padding: 10px 10px 20px 30px;">
+                    <a href="/company">
+                      <h4 style="font-size: 40px;color: #FFFFFF;font-weight: 900;" class="counter" data-target="<%= company %>">
+                      </h4>
+                      <span style="font-size: 22px;color: #FFFFFF">Total Company</span>
+                    </a>
+                  </div>
+                </div>
 
               </div>
-              <!--card stats end-->
-
             </div>
-            <!--end container-->
           </div>
+          <!--end container-->
         </div>
       </div>
     </div>
   </div>
+  </div>
   <!-- END: Page Main-->
   <%- include('_layouts/commonJs') %>
+
+  <script>
+    jQuery(document).ready(function($) {
+      $(".clickable-row").click(function() {
+        window.location = $(this).data("href");
+      });
+    });
+
+    // script.js
+    document.addEventListener('DOMContentLoaded', () => {
+      const counters = document.querySelectorAll('.counter');
+
+      counters.forEach(counter => {
+        const updateCounter = () => {
+          const target = +counter.getAttribute('data-target');
+          let count = 0;
+          const interval = setInterval(() => {
+            count += Math.ceil(target / 100);
+            if (count >= target) {
+              count = target;
+              clearInterval(interval);
+            }
+            counter.textContent = count;
+          }, 10);
+        };
+        updateCounter();
+      });
+    });
+  </script>
 </body>
 
 </html>

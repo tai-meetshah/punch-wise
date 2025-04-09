@@ -10,18 +10,18 @@
 <!-- END:  -->
 
 <body class="vertical-layout page-header-light vertical-menu-collapsible vertical-dark-menu preload-transitions 1-column login-bg blank-page blank-page" data-open="click" data-menu="vertical-dark-menu" data-col="1-column">
-    <div class="row">
+    <div class="row login-container">
         <div class="col s12">
             <div class="container">
                 <div id="login-page" class="row">
-                    <div class="col s12 m6 l4 z-depth-4 card-panel border-radius-6 login-card bg-opacity-8">
+                    <div class="col s12 m6 l4 z-depth-4 card-panel border-radius-6 login-card bg-opacity-8" style="background-color: white;">
                         <form class="login-form" id="form" action="/reset" method="post" onsubmit="return validate()">
                             <div class="row">
                                 <div class="input-field col s12">
                                     <h5 class="ml-4">Reset Password</h5>
                                 </div>
                             </div>
-                            <%- messages('messages', locals) %>
+                            <%- include('messages', { messages: messages }) %>
                             <input type="text" name="adminId" value="<%= adminId %>" hidden>
                             <div class="row margin">
                                 <div class="input-field col s12">
@@ -64,15 +64,15 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="input-field col s12">
-                                    <button class="btn waves-effect waves-light border-round gradient-45deg-purple-deep-orange col s12" type="submit" id="submitBtn">Reset Password</button>
+                                <div class="input-field col s12 mb-10">
+                                    <button class="btn waves-effect waves-light border-round col s12" type="submit" id="submitBtn"  style="background-color: #3D3D3D;">Reset Password</button>
                                 </div>
                             </div>
-                            <div class="row">
+                            <!-- <div class="row">
                                 <div class="input-field col s12">
                                     <p class="margin medium-small"><a href="/forgot">Reset password ?</a></p>
                                 </div>
-                            </div>
+                            </div> -->
                         </form>
                     </div>
                 </div>
