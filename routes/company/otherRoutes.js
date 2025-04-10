@@ -20,4 +20,20 @@ router.post(
     otherController.editHoliday
 );
 
+router.get('/client-list', checkCompany, otherController.getClient);
+
+router.post(
+    '/add-client',
+    checkCompany,
+    fileUpload(),
+    otherController.addClient
+);
+
+// router.post(
+//     '/edit-client',
+//     fileUpload(),
+//     checkCompany,
+//     otherController.editHoliday
+// );
+
 module.exports = router;

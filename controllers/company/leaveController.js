@@ -173,7 +173,7 @@ exports.leaveList = async (req, res, next) => {
             limit: limitNumber,
             totalLeaves: totalSalesmanLeaves + totalManagerLeaves,
             totalPages: Math.ceil(totalLeaves / limitNumber),
-            leaves,
+            leaves: { ...leavesManager, ...leavesSalesman },
         });
     } catch (error) {
         console.error(error);

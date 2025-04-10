@@ -6,7 +6,7 @@ const { UserFAQ, VendorFAQ } = require('../../models/faqsModel');
 exports.getTerms = async (req, res) => {
     try {
         const page = await Page.findOne({ key: 'termsConditions' });
-        res.render('terms', { page });
+        res.render('term', { page });
     } catch (error) {
         req.flash('red', error.message);
         res.redirect('/');
@@ -61,7 +61,7 @@ exports.postPrivacy = async (req, res) => {
             req.flash('red', 'Page not found');
             return res.redirect('/admin');
         }
-        page.title = req.body.title;
+        page.title = req.body.EnTitle;
         page.content = req.body.EnContent;
 
         if (req.file) {

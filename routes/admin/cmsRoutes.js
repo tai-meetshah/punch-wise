@@ -4,7 +4,7 @@ const cmsController = require('../../controllers/admin/cmsController');
 const { upload } = require('../../controllers/uploadController');
 
 router
-    .route('/terms')
+    .route('/term')
     .get(cmsController.getTerms)
     .post(upload.single('image'), cmsController.postTerms);
 

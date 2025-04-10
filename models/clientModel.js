@@ -9,6 +9,10 @@ const clientSchema = new mongoose.Schema({
         required: [true, validate.error.name],
         trim: true,
     },
+    company: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Company',
+    },
     manager: [
         {
             type: mongoose.Schema.Types.ObjectId,
@@ -56,9 +60,7 @@ const clientSchema = new mongoose.Schema({
     businessCountry: String,
     businessPincode: String,
 
-    photo: { type: String, default: '/uploads/default_user.jpg' },
-
-    blocked: { type: Boolean, default: false, select: false, immutable: true },
+    active: { type: Boolean, default: true, select: false, immutable: true },
     date: { type: Date, default: Date.now },
     isDeleted: { type: Boolean, default: false, select: false },
 });
