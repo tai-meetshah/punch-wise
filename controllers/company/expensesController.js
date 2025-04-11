@@ -98,7 +98,8 @@ exports.expensesList = async (req, res, next) => {
         } = req.query;
         let query = {};
 
-        if (status) query.status = status;
+        if (status) query.status = { $in: status.split(',') };
+
         if (dateFilter) {
             const dateRange = getDateRange(dateFilter);
 
