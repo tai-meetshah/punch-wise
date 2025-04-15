@@ -83,18 +83,18 @@ const getDateRange = filter => {
     switch (filter) {
         case 'today':
             return {
-                fromDate: now.startOf('day').toDate(),
-                toDate: now.endOf('day').toDate(),
+                fromDate: now.utc().startOf('day').toDate(),
+                toDate: now.utc().endOf('day').toDate(),
             };
         case 'thisMonth':
             return {
-                fromDate: now.startOf('month').toDate(),
-                toDate: now.endOf('month').toDate(),
+                fromDate: now.utc().startOf('month').toDate(),
+                toDate: now.utc().endOf('month').toDate(),
             };
         case 'past7Days':
             return {
-                toDate: now.endOf('day').toDate(),
-                fromDate: now.subtract(7, 'days').toDate(),
+                toDate: now.utc().endOf('day').toDate(),
+                fromDate: now.utc().subtract(7, 'days').toDate(),
             };
         case 'custom':
             return {};
@@ -117,16 +117,20 @@ exports.leaveList = async (req, res, next) => {
 
         if (status) query.status = { $in: status.split(',') };
 
-        if (dateFilter) {
+        if (dateFilter && !startDate && !endDate) {
             const dateRange = getDateRange(dateFilter);
-            query.fromDate = { $gte: dateRange.fromDate };
-            query.toDate = { $lte: dateRange.toDate };
+            query.requestedOn = {
+                $gte: dateRange.fromDate,
+                $lte: dateRange.toDate,
+            };
         }
 
         // Handle custom date range
         if (startDate && endDate) {
-            query.fromDate = { $gte: new Date(startDate) };
-            query.toDate = { $lte: new Date(endDate) };
+            query.requestedOn = {
+                $gte: new Date(startDate),
+                $lte: new Date(endDate),
+            };
         }
 
         const pageNumber = parseInt(page, 10);
@@ -140,7 +144,8 @@ exports.leaveList = async (req, res, next) => {
             .populate('company', 'name')
             .select('-__v -salesman')
             .skip(skip)
-            .limit(limitNumber);
+            .limit(limitNumber)
+            .sort({ requestedOn: -1 });
 
         res.json({
             success: true,
