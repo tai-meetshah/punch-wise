@@ -140,24 +140,25 @@ exports.cancelExpenses = async (req, res, next) => {
     }
 };
 
+//! update this and list
 const getDateRange = filter => {
     const now = moment();
 
     switch (filter) {
         case 'today':
             return {
-                fromDate: now.startOf('day').toDate(),
-                toDate: now.endOf('day').toDate(),
+                fromDate: now.utc().startOf('day').toDate(),
+                toDate: now.utc().endOf('day').toDate(),
             };
         case 'thisMonth':
             return {
-                fromDate: now.startOf('month').toDate(),
-                toDate: now.endOf('month').toDate(),
+                fromDate: now.utc().startOf('month').toDate(),
+                toDate: now.utc().endOf('month').toDate(),
             };
         case 'past7Days':
             return {
-                toDate: now.endOf('day').toDate(),
-                fromDate: now.subtract(7, 'days').toDate(),
+                toDate: now.utc().endOf('day').toDate(),
+                fromDate: now.utc().subtract(7, 'days').toDate(),
             };
         case 'custom':
             return {};
@@ -183,11 +184,17 @@ exports.expensesList = async (req, res, next) => {
         if (dateFilter) {
             const dateRange = getDateRange(dateFilter);
 
-            query.date = { $gte: dateRange.fromDate, $lte: dateRange.toDate };
+            query.createdAt = {
+                $gte: dateRange.fromDate,
+                $lte: dateRange.toDate,
+            };
         }
         // Handle custom date range
         if (startDate && endDate) {
-            query.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
+            query.createdAt = {
+                $gte: new Date(startDate),
+                $lte: new Date(endDate),
+            };
         }
 
         const pageNumber = parseInt(page, 10);

@@ -3,6 +3,8 @@ const { ManagerFAQ } = require('../../models/faqsModel');
 const { ManagerMessage } = require('../../models/messageModel');
 const msg = require('../../utils/message.json');
 
+//* getTermsCondition are same for salseman and manager
+
 exports.getFAQs = async (req, res, next) => {
     try {
         let faqs = await ManagerFAQ.find().sort('-_id').select('-__v');

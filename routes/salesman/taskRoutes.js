@@ -6,13 +6,7 @@ const taskController = require('../../controllers/salesman/taskController');
 
 router.get('/task-list', checkSalesman, taskController.taskList);
 
-router.post('/add-task', fileUpload(), checkSalesman, taskController.addTask);
-router.post(
-    '/edit-task/:id',
-    fileUpload(),
-    checkSalesman,
-    taskController.editTask
-);
+//* salesman can not add task
 
 // router.post('/start-task', fileUpload(), checkSalesman, taskController.addTask);
 // router.post('/complete-task', fileUpload(), checkSalesman, taskController.addTask);

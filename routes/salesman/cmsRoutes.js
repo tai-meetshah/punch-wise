@@ -8,8 +8,6 @@ router.get('/about', cmsController.getAbout);
 
 router.get('/privacy', cmsController.getPrivacy);
 
-router.get('/faq', cmsController.getFAQs);
-
 router
     .route('/contact')
     .get(cmsController.getContact)

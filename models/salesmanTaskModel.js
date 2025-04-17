@@ -31,7 +31,7 @@ const taskSchema = new mongoose.Schema({
     startDate: { type: Date, required: true },
     task: { type: String, required: true },
     priority: { type: String, required: true },
-    // shiftType: { type: String, required: true },
+    shiftType: { type: String },
     deadline: { type: Date, required: true },
 
     // coordinates: {
@@ -84,12 +84,13 @@ const taskSchema = new mongoose.Schema({
     // ** Shift Type Change Request**
     shiftChangeRequest: {
         requestedShift: { type: String },
+        reason: { type: String },
         status: {
             type: String,
             enum: ['Pending', 'Approved', 'Rejected'],
             // default: 'Pending',
         },
-        requestedAt: { type: Date },
+        requestedAt: { type: Date, default: Date.now },
         reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Manager' },
     },
 
