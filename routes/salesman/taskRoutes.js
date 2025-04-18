@@ -11,6 +11,6 @@ router.get('/task-list', checkSalesman, taskController.taskList);
 // router.post('/start-task', fileUpload(), checkSalesman, taskController.addTask);
 // router.post('/complete-task', fileUpload(), checkSalesman, taskController.addTask);
 
-// router.post('/shift-change', fileUpload(), checkSalesman, taskController.addTask);
+router.post('/shift-change-request', fileUpload(), checkSalesman, taskController.changeShiftRequest);
 
 module.exports = router;

@@ -63,3 +63,35 @@ exports.taskList = async (req, res, next) => {
         next(error);
     }
 };
+//! postman testing pendin
+
+exports.changeShiftRequest = async (req, res, next) => {
+    try {
+        const { taskid, requestedShift, reason } = req.body;
+
+        const leave = await Task.findById(taskid);
+        if (!leave)
+            return res
+                .status(404)
+                .json({ success: false, message: 'Task not found' });
+
+        if (!leave.shiftChangeRequest) {
+            leave.shiftChangeRequest = {};
+        }
+
+        leave.shiftChangeRequest.requestedShift = requestedShift;
+        leave.shiftChangeRequest.reason = reason;
+        leave.shiftChangeRequest.status = 'Pending';
+        leave.shiftChangeRequest.requestedAt = new Date();
+
+        await leave.save();
+
+        res.json({
+            success: true,
+            message: 'Shift change request submitted',
+            tasks: leave,
+        });
+    } catch (error) {
+        next(error);
+    }
+};

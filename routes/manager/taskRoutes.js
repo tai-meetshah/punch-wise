@@ -26,6 +26,6 @@ router.post(
 // router.post('/start-task', fileUpload(), checkManager, taskController.addTask);
 // router.post('/complete-task', fileUpload(), checkManager, taskController.addTask);
 
-// router.post('/shift-change', fileUpload(), checkManager, taskController.addTask);
+router.post('/shift-change-review', fileUpload(), checkManager, taskController.changeShiftStatus);
 
 module.exports = router;

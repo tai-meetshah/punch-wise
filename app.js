@@ -78,6 +78,7 @@ app.use('/api/salesman', require('./routes/salesman/dashboardRoutes'));
 app.use('/api/salesman', require('./routes/salesman/leaveRoutes'));
 app.use('/api/salesman', require('./routes/salesman/expensesRoutes'));
 app.use('/api/salesman', require('./routes/salesman/otherRoutes'));
+app.use('/api/salesman', require('./routes/salesman/taskRoutes'));
 
 // 3) manager ROUTES
 app.use('/api/manager', require('./routes/manager/authRoutes'));

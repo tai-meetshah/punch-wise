@@ -5,14 +5,12 @@ const { checkCompany } = require('../../controllers/company/authController');
 const otherController = require('../../controllers/company/otherController');
 
 router.get('/holiday-list', checkCompany, otherController.getHoliday);
-
 router.post(
     '/add-holiday',
     checkCompany,
     fileUpload(),
     otherController.addHoliday
 );
-
 router.post(
     '/edit-holiday',
     fileUpload(),
@@ -21,19 +19,23 @@ router.post(
 );
 
 router.get('/client-list', checkCompany, otherController.getClient);
-
 router.post(
     '/add-client',
     checkCompany,
     fileUpload(),
     otherController.addClient
 );
-
-// router.post(
-//     '/edit-client',
-//     fileUpload(),
-//     checkCompany,
-//     otherController.editHoliday
-// );
+router.post(
+    '/edit-client',
+    fileUpload(),
+    checkCompany,
+    otherController.editClient
+);
+router.post(
+    '/update-client-status',
+    fileUpload(),
+    checkCompany,
+    otherController.updateClientStatus
+);
 
 module.exports = router;

@@ -60,7 +60,11 @@ const clientSchema = new mongoose.Schema({
     businessCountry: String,
     businessPincode: String,
 
-    active: { type: Boolean, default: true, select: false, immutable: true },
+    status: {
+        type: String,
+        enum: ['Active', 'Inactive'],
+        default: 'Active',
+    },
     date: { type: Date, default: Date.now },
     isDeleted: { type: Boolean, default: false, select: false },
 });

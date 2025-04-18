@@ -125,11 +125,17 @@ exports.expensesList = async (req, res, next) => {
         if (dateFilter) {
             const dateRange = getDateRange(dateFilter);
 
-            query.date = { $gte: dateRange.fromDate, $lte: dateRange.toDate };
+            query.createdAt = {
+                $gte: dateRange.fromDate,
+                $lte: dateRange.toDate,
+            };
         }
         // Handle custom date range
         if (startDate && endDate) {
-            query.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
+            query.createdAt = {
+                $gte: new Date(startDate),
+                $lte: new Date(endDate),
+            };
         }
 
         const pageNumber = parseInt(page, 10);
@@ -154,7 +160,6 @@ exports.expensesList = async (req, res, next) => {
             expenses,
         });
     } catch (error) {
-        console.error(error);
         next(error);
     }
 };

@@ -140,7 +140,6 @@ exports.cancelExpenses = async (req, res, next) => {
     }
 };
 
-//! update this and list
 const getDateRange = filter => {
     const now = moment();
 

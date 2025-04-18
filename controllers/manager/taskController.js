@@ -208,3 +208,40 @@ exports.taskList = async (req, res, next) => {
         next(error);
     }
 };
+//! postman testing pendin
+
+exports.changeShiftStatus = async (req, res, next) => {
+    try {
+        const { status, taskid } = req.body;
+
+        if (!['Approved', 'Rejected'].includes(status))
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Invalid status. Allowed values: 'Approved', 'Rejected'.",
+            });
+
+        const leave = await Task.findById(taskid);
+        if (!leave)
+            return res
+                .status(404)
+                .json({ success: false, message: 'Task not found' });
+
+        if (status === 'Approved') {
+            leave.shiftType = leave.shiftChangeRequest.requestedShift;
+        }
+
+        leave.shiftChangeRequest.status = status;
+        leave.shiftChangeRequest.reviewedBy = req.manager.id;
+
+        await leave.save();
+
+        res.json({
+            success: true,
+            message: `Shift status updated successfully`,
+            shift: leave,
+        });
+    } catch (error) {
+        next(error);
+    }
+};

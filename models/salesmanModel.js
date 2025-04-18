@@ -94,6 +94,11 @@ const salesmanSchema = new mongoose.Schema({
     blocked: { type: Boolean, default: false, select: false, immutable: true },
     date: { type: Date, default: Date.now },
     profileComplted: { type: Boolean, default: false },
+    status: {
+        type: String,
+        enum: ['Active', 'Inactive'],
+        default: 'Active',
+    },
     isDeleted: { type: Boolean, default: false, select: false },
 });
 

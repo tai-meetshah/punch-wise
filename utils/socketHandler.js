@@ -244,17 +244,6 @@ module.exports = io => {
 
                 if (!receiverUser) throw new Error('Receiver not found');
 
-                // const notification = await Notification.create({
-                //     sentTo: [receiverId],
-                //     title: 'New Message',
-                //     body: message,
-                //     senderId,
-                //     senderType,
-                //     receiverId,
-                //     receiverType,
-                //     type: 'chat notification',
-                // });
-
                 const { deletedBy, readBy, ...messageToSend } =
                     chatMessage.toObject();
 

@@ -4,7 +4,7 @@ const Client = require('../../models/clientModel');
 exports.addHoliday = async (req, res, next) => {
     try {
         const data = await Holiday.create({
-            company: req.body.company,
+            company: req.company.id,
             date: req.body.date,
             name: req.body.name,
         });
@@ -21,7 +21,7 @@ exports.addHoliday = async (req, res, next) => {
 
 exports.getHoliday = async (req, res, next) => {
     try {
-        const data = await Holiday.find({ company: req.body.company });
+        const data = await Holiday.find({ company: req.company.id });
         if (!data || data.length === 0) {
             return res.status(404).json({
                 success: false,
@@ -37,10 +37,10 @@ exports.getHoliday = async (req, res, next) => {
 
 exports.editHoliday = async (req, res, next) => {
     try {
-        const { name, date, companyId } = req.body;
+        const { name, date, holidayId } = req.body;
 
         const data = await Holiday.findByIdAndUpdate(
-            companyId,
+            holidayId,
             {
                 name,
                 date,
@@ -63,7 +63,7 @@ exports.editHoliday = async (req, res, next) => {
 
 exports.getClient = async (req, res, next) => {
     try {
-        const data = await Client.find({ company: req.body.company });
+        const data = await Client.find({ company: req.company.id });
         if (!data || data.length === 0) {
             return res.status(404).json({
                 success: false,
@@ -108,6 +108,59 @@ exports.addClient = async (req, res, next) => {
         res.status(201).json({
             success: true,
             message: 'Client created successfully',
+            data,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+//! postman testing pendin
+exports.editClient = async (req, res, next) => {
+    try {
+        const { clientid } = req.body;
+
+        const data = await Client.findByIdAndUpdate(clientid, req.body, {
+            new: true,
+            runValidators: true,
+        });
+
+        res.json({
+            success: true,
+            message: 'Client updated succefully',
+            data,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+//! postman testing pendin
+
+exports.updateClientStatus = async (req, res, next) => {
+    try {
+        const { status, clientid } = req.body;
+
+        if (!['Active', 'Inactive'].includes(status))
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Invalid status. Allowed values: 'Active', 'Inactive'",
+            });
+
+        const data = await Client.findByIdAndUpdate(
+            clientid,
+            {
+                status,
+            },
+            {
+                new: true,
+                runValidators: true,
+            }
+        );
+
+        res.json({
+            success: true,
+            message: 'Client status updated succefully',
             data,
         });
     } catch (error) {
