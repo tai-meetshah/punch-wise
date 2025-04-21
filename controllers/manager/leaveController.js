@@ -40,20 +40,59 @@ exports.changeLeaveStatus = async (req, res, next) => {
 
 exports.salesmanLeaveRequests = async (req, res, next) => {
     try {
-        const leave = await SalesmanLeave.find()
-            .populate('salesman', 'name')
-            .select('-manager -__v')
-            .lean();
-        if (!leave || leave.length === 0)
+        const {
+            status,
+            dateFilter,
+            startDate,
+            endDate,
+            page = 1,
+            limit = 10,
+        } = req.query;
+        let query = {};
+
+        if (status) query.status = { $in: status.split(',') };
+
+        if (dateFilter && !startDate && !endDate) {
+            const dateRange = getDateRange(dateFilter);
+            query.requestedOn = {
+                $gte: dateRange.fromDate,
+                $lte: dateRange.toDate,
+            };
+        }
+
+        // Handle custom date range
+        if (startDate && endDate) {
+            query.requestedOn = {
+                $gte: new Date(startDate),
+                $lte: new Date(endDate),
+            };
+        }
+
+        const pageNumber = parseInt(page, 10);
+        const limitNumber = parseInt(limit, 10);
+        const skip = (pageNumber - 1) * limitNumber;
+
+        const totalLeaves = await SalesmanLeave.countDocuments(query);
+
+        const leaves = await SalesmanLeave.find(query)
+            .populate('manager', 'name')
+            .populate('company', 'name')
+            .select('-__v -salesman')
+            .skip(skip)
+            .limit(limitNumber)
+            .sort({ requestedOn: -1 });
+        if (!leaves || leaves.length === 0)
             return res
                 .status(404)
                 .json({ success: false, message: 'Leave request not found' });
 
-        leave.manager = undefined;
-
         res.json({
             success: true,
-            leave,
+            page: pageNumber,
+            limit: limitNumber,
+            totalLeaves,
+            totalPages: Math.ceil(totalLeaves / limitNumber),
+            leaves,
         });
     } catch (error) {
         next(error);
