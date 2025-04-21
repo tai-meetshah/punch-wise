@@ -75,7 +75,7 @@ exports.salesmanLeaveRequests = async (req, res, next) => {
         const totalLeaves = await SalesmanLeave.countDocuments(query);
 
         const leaves = await SalesmanLeave.find(query)
-            .populate('manager', 'name')
+            .populate('salesman', 'name')
             .populate('company', 'name')
             .select('-__v -salesman')
             .skip(skip)
