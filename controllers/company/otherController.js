@@ -63,7 +63,10 @@ exports.editHoliday = async (req, res, next) => {
 
 exports.getClient = async (req, res, next) => {
     try {
-        const data = await Client.find({ company: req.company.id });
+        const data = await Client.find({ company: req.company.id }).populate(
+            'manager',
+            'name'
+        );
         if (!data || data.length === 0) {
             return res.status(404).json({
                 success: false,
@@ -80,6 +83,7 @@ exports.getClient = async (req, res, next) => {
 exports.addClient = async (req, res, next) => {
     try {
         const data = await Client.create({
+            company: req.company.id,
             name: req.body.name,
             manager: req.body.manager,
             email: req.body.email,
@@ -143,8 +147,7 @@ exports.updateClientStatus = async (req, res, next) => {
         if (!['Active', 'Inactive'].includes(status))
             return res.status(400).json({
                 success: false,
-                message:
-                    "Invalid status. Allowed values: 'Active', 'Inactive'",
+                message: "Invalid status. Allowed values: 'Active', 'Inactive'",
             });
 
         const data = await Client.findByIdAndUpdate(

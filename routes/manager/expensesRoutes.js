@@ -5,7 +5,7 @@ const { checkManager } = require('../../controllers/manager/authController');
 const expensesController = require('../../controllers/manager/expensesController');
 const { upload } = require('../../controllers/uploadController');
 
-// router.get('/expenses-list', checkManager, expensesController.expensesList);
+router.get('/expenses-list', checkManager, expensesController.expensesList);
 
 router.get(
     '/salesman-expenses-requests',

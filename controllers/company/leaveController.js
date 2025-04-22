@@ -161,14 +161,16 @@ exports.leaveList = async (req, res, next) => {
 
         const leavesManager = await ManagerLeave.find(query)
             .populate('manager', 'name')
-            .select('-__v -salesman')
+            .populate('salesman', 'name')
+            .select('-__v -company')
             .skip(skip)
             .limit(limitNumber)
             .sort({ requestedOn: -1 });
 
         const leavesSalesman = await SalesmanLeave.find(query)
+            .populate('salesman', 'name')
             .populate('manager', 'name')
-            .select('-__v -salesman')
+            .select('-__v -company')
             .skip(skip)
             .limit(limitNumber)
             .sort({ requestedOn: -1 });
