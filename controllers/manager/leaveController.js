@@ -77,7 +77,7 @@ exports.salesmanLeaveRequests = async (req, res, next) => {
         const leaves = await SalesmanLeave.find(query)
             .populate('salesman', 'name')
             .populate('company', 'name')
-            .select('-__v -salesman')
+            .select('-__v -manager')
             .skip(skip)
             .limit(limitNumber)
             .sort({ requestedOn: -1 });
@@ -90,6 +90,7 @@ exports.salesmanLeaveRequests = async (req, res, next) => {
             success: true,
             page: pageNumber,
             limit: limitNumber,
+            //users : data,
             totalLeaves,
             totalPages: Math.ceil(totalLeaves / limitNumber),
             leaves,
