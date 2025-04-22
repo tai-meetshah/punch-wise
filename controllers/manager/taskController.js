@@ -197,6 +197,7 @@ exports.taskList = async (req, res, next) => {
         const tasks = await Task.find(query)
             .populate('salesman')
             .populate('company')
+            .populate('client', 'businessName name')
             .select('-__v -manager');
 
         res.json({
