@@ -39,19 +39,53 @@ exports.changeExpensesStatus = async (req, res, next) => {
 
 exports.salesmanExpensesRequests = async (req, res, next) => {
     try {
-        const leave = await SalesmanExpenses.find()
+        const {
+            status,
+            dateFilter,
+            startDate,
+            endDate,
+            page = 1,
+            limit = 10,
+        } = req.query;
+        let query = {};
+
+        if (status) query.status = { $in: status.split(',') };
+        if (dateFilter) {
+            const dateRange = getDateRange(dateFilter);
+
+            query.createdAt = {
+                $gte: dateRange.fromDate,
+                $lte: dateRange.toDate,
+            };
+        }
+        // Handle custom date range
+        if (startDate && endDate) {
+            query.createdAt = {
+                $gte: new Date(startDate),
+                $lte: new Date(endDate),
+            };
+        }
+
+        const pageNumber = parseInt(page, 10);
+        const limitNumber = parseInt(limit, 10);
+        const skip = (pageNumber - 1) * limitNumber;
+
+        const totalExpenses = await SalesmanExpenses.countDocuments(query);
+
+        const expenses = await SalesmanExpenses.find(query)
             .populate('salesman', 'name')
-            .select('-manager -__v')
-            .lean();
-        if (!leave || leave.length === 0)
-            return res.status(404).json({
-                success: false,
-                message: 'expenses request not found',
-            });
+            .populate('company', 'name')
+            .select('-__v -manager')
+            .skip(skip)
+            .limit(limitNumber);
 
         res.json({
             success: true,
-            expenses: leave,
+            page: pageNumber,
+            limit: limitNumber,
+            totalExpenses,
+            totalPages: Math.ceil(totalExpenses / limitNumber),
+            expenses,
         });
     } catch (error) {
         next(error);
