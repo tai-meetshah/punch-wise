@@ -2,18 +2,18 @@ const bcrypt = require('bcryptjs');
 const createError = require('http-errors');
 const message = require('../../utils/message.json');
 
-const Salesman = require('../../models/salesmanModel');
+const Company = require('../../models/companyModel');
 
 exports.getProfile = async (req, res, next) => {
     try {
-        const salesman = { ...req.salesman._doc };
+        const company = { ...req.company._doc };
 
         // Hide fields
-        delete salesman.password;
-        delete salesman.__v;
-        delete salesman.date;
+        delete company.password;
+        delete company.__v;
+        delete company.date;
 
-        res.json({ success: true, salesman });
+        res.json({ success: true, company });
     } catch (error) {
         next(error);
     }
@@ -27,8 +27,8 @@ exports.editProfile = async (req, res, next) => {
         delete req.body.phone;
         delete req.body.password;
 
-        const user = await Salesman.findByIdAndUpdate(
-            req.salesman.id,
+        const user = await Company.findByIdAndUpdate(
+            req.company.id,
             req.body,
             {
                 new: true,
@@ -39,7 +39,7 @@ exports.editProfile = async (req, res, next) => {
         res.json({
             success: true,
             message: message.success.profileUpdateSuccefully,
-            salesman: user,
+            company: user,
         });
     } catch (error) {
         next(error);
@@ -48,7 +48,7 @@ exports.editProfile = async (req, res, next) => {
 
 exports.changePasswordCheck = async (req, res, next) => {
     try {
-        const user = req.salesman;
+        const user = req.company;
         const { password } = req.body;
         if (!password)
             return next(createError.BadRequest('Please provide PIN.'));
@@ -68,7 +68,7 @@ exports.changePasswordCheck = async (req, res, next) => {
 
 exports.changePassword = async (req, res, next) => {
     try {
-        const user = req.salesman;
+        const user = req.company;
         const { password, newPassword } = req.body;
 
         if (!password)
