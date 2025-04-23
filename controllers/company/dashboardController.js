@@ -2,19 +2,18 @@ const bcrypt = require('bcryptjs');
 const createError = require('http-errors');
 const message = require('../../utils/message.json');
 
-const Salesman = require('../../models/salesmanModel');
+const Company = require('../../models/companyModel');
 
 exports.getProfile = async (req, res, next) => {
     try {
-        const user = { ...req.salesman._doc };
+        const company = { ...req.company._doc };
 
         // Hide fields
-        delete user.password;
-        delete user.favourites;
-        delete user.__v;
-        delete user.date;
+        delete company.password;
+        delete company.__v;
+        delete company.date;
 
-        res.json({ success: true, user });
+        res.json({ success: true, company });
     } catch (error) {
         next(error);
     }
@@ -25,11 +24,11 @@ exports.editProfile = async (req, res, next) => {
         if (req.file) req.body.photo = `/uploads/${req.file.filename}`;
 
         // Not allowed to change
-        delete req.body.email;
+        delete req.body.phone;
         delete req.body.password;
 
-        const user = await Salesman.findByIdAndUpdate(
-            req.salesman.id,
+        const user = await Company.findByIdAndUpdate(
+            req.company.id,
             req.body,
             {
                 new: true,
@@ -40,7 +39,7 @@ exports.editProfile = async (req, res, next) => {
         res.json({
             success: true,
             message: message.success.profileUpdateSuccefully,
-            user,
+            company: user,
         });
     } catch (error) {
         next(error);

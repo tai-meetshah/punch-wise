@@ -2,18 +2,19 @@ const bcrypt = require('bcryptjs');
 const createError = require('http-errors');
 const message = require('../../utils/message.json');
 
-const Company = require('../../models/companyModel');
+const Salesman = require('../../models/salesmanModel');
 
 exports.getProfile = async (req, res, next) => {
     try {
-        const company = { ...req.company._doc };
+        const salesman = { ...req.salesman._doc };
 
         // Hide fields
-        delete company.password;
-        delete company.__v;
-        delete company.date;
+        delete salesman.password;
+        delete salesman.favourites;
+        delete salesman.__v;
+        delete salesman.date;
 
-        res.json({ success: true, company });
+        res.json({ success: true, salesman });
     } catch (error) {
         next(error);
     }
@@ -27,8 +28,8 @@ exports.editProfile = async (req, res, next) => {
         delete req.body.phone;
         delete req.body.password;
 
-        const user = await Company.findByIdAndUpdate(
-            req.company.id,
+        const user = await Salesman.findByIdAndUpdate(
+            req.salesman.id,
             req.body,
             {
                 new: true,
@@ -39,7 +40,7 @@ exports.editProfile = async (req, res, next) => {
         res.json({
             success: true,
             message: message.success.profileUpdateSuccefully,
-            company: user,
+            salesman: user,
         });
     } catch (error) {
         next(error);
@@ -54,8 +55,7 @@ exports.changePasswordCheck = async (req, res, next) => {
             return next(createError.BadRequest('Please provide PIN.'));
 
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch)
-            return next(createError.BadRequest('PIN incorrect.'));
+        if (!isMatch) return next(createError.BadRequest('PIN incorrect.'));
 
         res.json({
             success: true,
