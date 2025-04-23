@@ -92,7 +92,7 @@ app.use('/api/manager', require('./routes/manager/taskRoutes'));
 // 3) company ROUTES
 app.use('/api/company', require('./routes/company/authRoutes'));
 // app.use('/api/company', require('./routes/company/cmsRoutes'));
-// app.use('/api/company', require('./routes/company/dashboardRoutes'));
+app.use('/api/company', require('./routes/company/dashboardRoutes'));
 // app.use('/api/company', require('./routes/company/leaveRoutes'));
 // app.use('/api/company', require('./routes/company/expensesRoutes'));
 app.use('/api/company', require('./routes/company/otherRoutes'));
