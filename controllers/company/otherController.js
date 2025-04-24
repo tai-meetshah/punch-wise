@@ -1,5 +1,22 @@
 const Holiday = require('../../models/holidayModel');
 const Client = require('../../models/clientModel');
+const Manager = require('../../models/managerModel');
+
+exports.getManager = async (req, res, next) => {
+    try {
+        const data = await Manager.find({ company: req.company.id });
+        if (!data || data.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Manager not found.',
+            });
+        }
+
+        res.json({ success: true, data });
+    } catch (error) {
+        next(error);
+    }
+};
 
 exports.addHoliday = async (req, res, next) => {
     try {
@@ -119,7 +136,6 @@ exports.addClient = async (req, res, next) => {
     }
 };
 
-//! postman testing pendin
 exports.editClient = async (req, res, next) => {
     try {
         const { clientid } = req.body;
