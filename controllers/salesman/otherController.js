@@ -14,7 +14,7 @@ exports.getHoliday = async (req, res, next) => {
     }
 };
 
-exports.getCompany = async (req, res, next) => {
+exports.getCompanyInfo = async (req, res, next) => {
     try {
         const companyId = req.salesman?.company;
         const [company, business] = await Promise.all([
@@ -31,6 +31,18 @@ exports.getCompany = async (req, res, next) => {
         company.gender = undefined;
 
         res.json({ success: true, data: { ...company, ...business } });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.getCompany = async (req, res, next) => {
+    try {
+        const data = await Business.find({ isDeleted: false })
+            .select('businessName company')
+            .populate('company', 'name');
+
+        res.json({ success: true, data });
     } catch (error) {
         next(error);
     }
