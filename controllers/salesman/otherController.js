@@ -22,13 +22,15 @@ exports.getCompanyInfo = async (req, res, next) => {
             Business.findOne({ company: companyId }).lean(),
         ]);
 
-        company.salesman = undefined;
-        company.role = undefined;
-        company.manager = undefined;
-        company.client = undefined;
-        company.fcmToken = undefined;
-        company.step = undefined;
-        company.gender = undefined;
+        if (company) {
+            company.salesman = undefined;
+            company.role = undefined;
+            company.manager = undefined;
+            company.client = undefined;
+            company.fcmToken = undefined;
+            company.step = undefined;
+            company.gender = undefined;
+        }
 
         res.json({ success: true, data: { ...company, ...business } });
     } catch (error) {
