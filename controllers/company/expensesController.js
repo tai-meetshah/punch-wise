@@ -124,8 +124,8 @@ exports.expensesList = async (req, res, next) => {
 
         const expenses = await Expenses.find(query)
             .populate('manager', 'name')
-            .populate('company', 'name')
-            .select('-__v -salesman')
+            .populate('salesman', 'name')
+            .select('-__v -company')
             .skip(skip)
             .limit(limitNumber);
 

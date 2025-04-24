@@ -22,7 +22,7 @@ exports.getCompany = async (req, res, next) => {
             Business.findOne({ company: companyId }).lean(),
         ]);
 
-        company.salesman = undefined;
+        // company.salesman = undefined;
         company.role = undefined;
         company.manager = undefined;
         company.client = undefined;
@@ -32,6 +32,7 @@ exports.getCompany = async (req, res, next) => {
 
         res.json({ success: true, data: { ...company, ...business } });
     } catch (error) {
+        console.log('error: ', error);
         next(error);
     }
 };
