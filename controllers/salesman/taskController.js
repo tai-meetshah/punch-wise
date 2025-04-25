@@ -95,3 +95,57 @@ exports.changeShiftRequest = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.startTask = async (req, res, next) => {
+    try {
+        const { taskid } = req.body;
+
+        const data = await Task.findById(taskid);
+        if (!data)
+            return res
+                .status(404)
+                .json({ success: false, message: 'Task not found' });
+
+        data.status = 'Start';
+
+        await data.save();
+
+        res.json({
+            success: true,
+            message: 'Task started sucessfully',
+            tasks: data,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.completeTask = async (req, res, next) => {
+    try {
+        const { taskid, contactPersonName, contactPersonNumber, description } =
+            req.body;
+
+        const data = await Task.findById(taskid);
+        if (!data)
+            return res
+                .status(404)
+                .json({ success: false, message: 'Task not found' });
+
+        data.contactPersonName = contactPersonName;
+        data.contactPersonNumber = contactPersonNumber;
+        data.description = description;
+        data.upload = req.files.img
+            ? `/uploads/${req.files.img[0].filename}`
+            : '';
+
+        await data.save();
+
+        res.json({
+            success: true,
+            message: 'Task completed sucessfully',
+            tasks: data,
+        });
+    } catch (error) {
+        next(error);
+    }
+};

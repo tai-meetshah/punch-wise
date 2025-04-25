@@ -31,28 +31,12 @@ const clientSchema = new mongoose.Schema({
         required: [true, validate.error.phone],
         unique: true,
     },
-    dob: {
-        type: String,
-    },
-    gender: {
-        type: String,
-    },
-    address: {
-        type: String,
-    },
-    city: {
-        type: String,
-    },
-    state: {
-        type: String,
-    },
 
     businessName: String,
     businessRegistrationType: String,
     businessCategory: String,
     businessWebsite: String,
     businessPhone: String,
-    businessAlternatePhone: String,
     businessEmail: String,
     businessAddress: String,
     businessCity: String,

@@ -106,12 +106,6 @@ exports.addClient = async (req, res, next) => {
             email: req.body.email,
             phone: req.body.phone,
 
-            dob: req.body.dob,
-            gender: req.body.gender,
-            address: req.body.address,
-            city: req.body.city,
-            state: req.body.state,
-
             businessName: req.body.businessName,
             businessRegistrationType: req.body.businessRegistrationType,
             businessCategory: req.body.businessCategory,
