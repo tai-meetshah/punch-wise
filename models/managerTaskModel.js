@@ -27,7 +27,7 @@ const taskSchema = new mongoose.Schema({
     //     type: { type: String, enum: ['Point'], default: 'Point' },
     //     coordinates: { type: [Number] },
     // },
-    attachment: { type: String, required: true },
+    attachment: { type: String },
 
     geofenceName: { type: String },
     shapeType: { type: String, enum: ['rectangle', 'circle'] },

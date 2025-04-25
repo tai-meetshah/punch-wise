@@ -111,7 +111,6 @@ exports.addClient = async (req, res, next) => {
             businessCategory: req.body.businessCategory,
             businessWebsite: req.body.businessWebsite,
             businessPhone: req.body.businessPhone,
-            businessAlternatePhone: req.body.businessAlternatePhone,
             businessEmail: req.body.businessEmail,
             businessAddress: req.body.businessAddress,
             businessCity: req.body.businessCity,
