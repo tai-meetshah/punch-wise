@@ -90,7 +90,6 @@ exports.salesmanLeaveRequests = async (req, res, next) => {
             success: true,
             page: pageNumber,
             limit: limitNumber,
-            //users : data,
             totalLeaves,
             totalPages: Math.ceil(totalLeaves / limitNumber),
             leaves,

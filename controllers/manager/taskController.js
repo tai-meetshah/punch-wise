@@ -38,6 +38,7 @@ exports.addTask = async (req, res, next) => {
         const leave = await Task.create({
             salesman: req.body.salesman,
             manager: req.manager.id,
+            company: req.manager.company,
             client: req.body.client,
 
             startDate: req.body.startDate,

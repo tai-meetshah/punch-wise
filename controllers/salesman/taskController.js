@@ -50,9 +50,10 @@ exports.taskList = async (req, res, next) => {
         }
 
         const tasks = await Task.find(query)
-            .populate('manager')
-            .populate('company')
-            .select('-__v -salesman');
+            .populate('manager', 'name photo')
+            .populate('client', 'name')
+            .select('-__v -salesman')
+            .sort('-_id');
 
         res.json({
             success: true,
