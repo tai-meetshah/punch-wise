@@ -51,7 +51,7 @@ exports.taskList = async (req, res, next) => {
 
         const tasks = await Task.find(query)
             .populate('manager', 'name photo')
-            .populate('client', 'name')
+            .populate('client', 'businessName name')
             .select('-__v -salesman')
             .sort('-_id');
 
