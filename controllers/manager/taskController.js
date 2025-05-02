@@ -177,7 +177,14 @@ const getDateRange = filter => {
 
 exports.taskList = async (req, res, next) => {
     try {
-        const { status, dateFilter, startDate, endDate } = req.query;
+        const {
+            status,
+            dateFilter,
+            startDate,
+            endDate,
+            page = 1,
+            limit = 10,
+        } = req.query;
         let query = {};
 
         if (status) query.status = status;
@@ -195,14 +202,26 @@ exports.taskList = async (req, res, next) => {
             query.toDate = { $lte: new Date(endDate) };
         }
 
+        const pageNumber = parseInt(page, 10);
+        const limitNumber = parseInt(limit, 10);
+        const skip = (pageNumber - 1) * limitNumber;
+
+        const total = await Task.countDocuments(query);
+
         const tasks = await Task.find(query)
             .populate('salesman')
             .populate('company')
             .populate('client', 'businessName name')
+            .skip(skip)
+            .limit(limitNumber)
             .select('-__v -manager');
 
         res.json({
             success: true,
+            page: pageNumber,
+            limit: limitNumber,
+            totalTask: total,
+            totalPages: Math.ceil(total / limitNumber),
             tasks,
         });
     } catch (error) {
