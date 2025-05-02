@@ -43,17 +43,20 @@ exports.taskList = async (req, res, next) => {
 
         if (status) query.status = status;
 
-        if (dateFilter) {
+        if (dateFilter && !startDate && !endDate) {
             const dateRange = getDateRange(dateFilter);
-
-            query.fromDate = { $gte: dateRange.fromDate };
-            query.toDate = { $lte: dateRange.toDate };
+            query.requestedOn = {
+                $gte: dateRange.fromDate,
+                $lte: dateRange.toDate,
+            };
         }
 
         // Handle custom date range
         if (startDate && endDate) {
-            query.fromDate = { $gte: new Date(startDate) };
-            query.toDate = { $lte: new Date(endDate) };
+            query.requestedOn = {
+                $gte: new Date(startDate),
+                $lte: new Date(endDate),
+            };
         }
 
         const pageNumber = parseInt(page, 10);
