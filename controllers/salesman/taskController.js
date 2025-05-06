@@ -154,6 +154,7 @@ exports.completeTask = async (req, res, next) => {
                 .status(404)
                 .json({ success: false, message: 'Task not found' });
 
+        data.status = 'Completed';
         data.contactPersonName = contactPersonName;
         data.contactPersonNumber = contactPersonNumber;
         data.description = description;
@@ -167,6 +168,45 @@ exports.completeTask = async (req, res, next) => {
             success: true,
             message: 'Task completed sucessfully',
             tasks: data,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.editTask = async (req, res, next) => {
+    try {
+        const updateData = {};
+
+        [
+            'taskid',
+            'contactPersonName',
+            'contactPersonNumber',
+            'description',
+        ].forEach(field => {
+            if (req.body[field]) updateData[field] = req.body[field];
+        });
+
+        if (req.files && req.files.img)
+            updateData.upload = `/uploads/${req.files.img[0].filename}`;
+
+        const data = await Task.findOneAndUpdate(
+            { _id: req.params.id },
+            { $set: updateData },
+            { new: true, runValidators: true }
+        );
+
+        if (!data) {
+            return res.status(404).json({
+                success: false,
+                message: 'Task not found.',
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Task edited successfully',
+            task: data,
         });
     } catch (error) {
         next(error);

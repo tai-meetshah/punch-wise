@@ -27,14 +27,10 @@ exports.editProfile = async (req, res, next) => {
         delete req.body.phone;
         delete req.body.password;
 
-        const user = await Company.findByIdAndUpdate(
-            req.company.id,
-            req.body,
-            {
-                new: true,
-                runValidators: true,
-            }
-        );
+        const user = await Company.findByIdAndUpdate(req.company.id, req.body, {
+            new: true,
+            runValidators: true,
+        });
 
         res.json({
             success: true,
@@ -54,8 +50,7 @@ exports.changePasswordCheck = async (req, res, next) => {
             return next(createError.BadRequest('Please provide PIN.'));
 
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch)
-            return next(createError.BadRequest('PIN incorrect.'));
+        if (!isMatch) return next(createError.BadRequest('PIN incorrect.'));
 
         res.json({
             success: true,

@@ -23,6 +23,13 @@ router.post(
 );
 
 router.post(
+    '/edit-complete-task',
+    upload.fields([{ name: 'img', maxCount: 1 }]),
+    checkSalesman,
+    taskController.completeTask
+);
+
+router.post(
     '/shift-change-request',
     fileUpload(),
     checkSalesman,
