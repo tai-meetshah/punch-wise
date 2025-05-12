@@ -85,6 +85,7 @@ const taskSchema = new mongoose.Schema({
     shiftChangeRequest: {
         requestedShift: { type: String },
         reason: { type: String },
+        rejectedReason: { type: String },
         status: {
             type: String,
             enum: ['Pending', 'Approved', 'Rejected'],

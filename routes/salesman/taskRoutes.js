@@ -29,6 +29,7 @@ router.post(
     taskController.completeTask
 );
 
+router.get('/shift-change-list', checkSalesman, taskController.shiftList);
 router.post(
     '/shift-change-request',
     fileUpload(),

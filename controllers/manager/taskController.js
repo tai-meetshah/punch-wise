@@ -187,7 +187,7 @@ exports.taskList = async (req, res, next) => {
         } = req.query;
         let query = {};
 
-        if (status) query.status = status;
+        if (status) query.status = { $in: status.split(',') };
 
         if (dateFilter && !startDate && !endDate) {
             const dateRange = getDateRange(dateFilter);
@@ -232,11 +232,10 @@ exports.taskList = async (req, res, next) => {
         next(error);
     }
 };
-//! postman testing pendin
 
 exports.changeShiftStatus = async (req, res, next) => {
     try {
-        const { status, taskid } = req.body;
+        const { status, taskid, rejectedReason } = req.body;
 
         if (!['Approved', 'Rejected'].includes(status))
             return res.status(400).json({
@@ -256,6 +255,7 @@ exports.changeShiftStatus = async (req, res, next) => {
         }
 
         leave.shiftChangeRequest.status = status;
+        leave.shiftChangeRequest.rejectedReason = rejectedReason;
         leave.shiftChangeRequest.reviewedBy = req.manager.id;
 
         await leave.save();

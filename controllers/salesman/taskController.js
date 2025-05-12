@@ -41,7 +41,7 @@ exports.taskList = async (req, res, next) => {
         } = req.query;
         let query = {};
 
-        if (status) query.status = status;
+        if (status) query.status = { $in: status.split(',') };
 
         if (dateFilter && !startDate && !endDate) {
             const dateRange = getDateRange(dateFilter);
@@ -87,7 +87,69 @@ exports.taskList = async (req, res, next) => {
     }
 };
 
-//! postman testing pendin
+exports.shiftList = async (req, res, next) => {
+    try {
+        const {
+            status,
+            dateFilter,
+            startDate,
+            endDate,
+            page = 1,
+            limit = 10,
+        } = req.query;
+        let query = {
+            'shiftChangeRequest.status': { $exists: true },
+            salesman: req.salesman.id,
+        };
+
+        if (status)
+            query['shiftChangeRequest.status'] = { $in: status.split(',') };
+
+        if (dateFilter && !startDate && !endDate) {
+            const dateRange = getDateRange(dateFilter);
+            query.requestedAt = {
+                $gte: dateRange.fromDate,
+                $lte: dateRange.toDate,
+            };
+        }
+
+        // Handle custom date range
+        if (startDate && endDate) {
+            query.requestedAt = {
+                $gte: new Date(startDate),
+                $lte: new Date(endDate),
+            };
+        }
+
+        const pageNumber = parseInt(page, 10);
+        const limitNumber = parseInt(limit, 10);
+        const skip = (pageNumber - 1) * limitNumber;
+
+        const totalTasks = await Task.countDocuments(query);
+
+        const data = await Task.find(query)
+            .populate('salesman', 'name')
+            .populate('client', 'name')
+            .populate('manager', 'name')
+            .populate('shiftChangeRequest.reviewedBy', 'name')
+            .populate('company', 'name')
+            .skip(skip)
+            .limit(limitNumber)
+            .sort({ 'shiftChangeRequest.requestedAt': -1 });
+
+        res.json({
+            success: true,
+            page: pageNumber,
+            limit: limitNumber,
+            totalTasks,
+            totalPages: Math.ceil(totalTasks / limitNumber),
+            data,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 exports.changeShiftRequest = async (req, res, next) => {
     try {
         const { taskid, requestedShift, reason } = req.body;
