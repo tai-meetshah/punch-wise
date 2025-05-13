@@ -129,7 +129,7 @@ exports.shiftList = async (req, res, next) => {
 
         const data = await Task.find(query)
             .populate('salesman', 'name')
-            .populate('client', 'name')
+            .populate('client', 'name businessName')
             .populate('manager', 'name')
             .populate('shiftChangeRequest.reviewedBy', 'name')
             .populate('company', 'name')
