@@ -36,5 +36,17 @@ router.post(
     checkSalesman,
     taskController.changeShiftRequest
 );
+router.post(
+    '/edit-shift-change-request',
+    fileUpload(),
+    checkSalesman,
+    taskController.editShift
+);
+router.post(
+    '/cancell-shift-change-request',
+    fileUpload(),
+    checkSalesman,
+    taskController.cancellShift
+);
 
 module.exports = router;
